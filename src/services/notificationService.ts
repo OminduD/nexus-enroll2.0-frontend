@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, ensureArray } from './api';
 import { NotificationItem } from '../types/notification';
 import { MOCK_NOTIFICATIONS } from './mockData';
 
@@ -6,7 +6,7 @@ export const notificationService = {
   getUserNotifications: async (userId = 1): Promise<NotificationItem[]> => {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}`);
-      return response.data || MOCK_NOTIFICATIONS;
+      return ensureArray(response.data, MOCK_NOTIFICATIONS);
     } catch {
       return MOCK_NOTIFICATIONS;
     }

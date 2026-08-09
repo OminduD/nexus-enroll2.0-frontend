@@ -40,9 +40,9 @@ export const CourseCatalogPage: React.FC = () => {
   const handleOpenSections = async (course: Course) => {
     setSelectedCourse(course);
     setIsModalOpen(true);
-    const allSecs = await courseService.getSections();
-    const courseSecs = allSecs.filter(s => s.courseId === course.id || s.courseCode === course.courseCode);
-    setSections(courseSecs.length > 0 ? courseSecs : allSecs.slice(0, 2));
+    const safeSecs = Array.isArray(allSecs) ? allSecs : [];
+    const courseSecs = safeSecs.filter(s => s.courseId === course.id || s.courseCode === course.courseCode);
+    setSections(courseSecs.length > 0 ? courseSecs : safeSecs.slice(0, 2));
   };
 
   const handleEnroll = async (section: CourseSection) => {

@@ -33,3 +33,10 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const ensureArray = <T>(data: any, fallback: T[] = []): T[] => {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.content)) return data.content;
+  if (data && Array.isArray(data.data)) return data.data;
+  return fallback;
+};

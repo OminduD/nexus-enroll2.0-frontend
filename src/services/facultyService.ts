@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, ensureArray } from './api';
 import { FacultyProfile, ClassRosterStudent, GradeRecord } from '../types/faculty';
 import { MOCK_FACULTY_PROFILE, MOCK_ROSTER_STUDENTS, MOCK_GRADES } from './mockData';
 
@@ -15,7 +15,7 @@ export const facultyService = {
   getRoster: async (sectionId = 1): Promise<ClassRosterStudent[]> => {
     try {
       const response = await apiClient.get(`/api/faculty/roster?sectionId=${sectionId}`);
-      return response.data || MOCK_ROSTER_STUDENTS;
+      return ensureArray(response.data, MOCK_ROSTER_STUDENTS);
     } catch {
       return MOCK_ROSTER_STUDENTS;
     }
@@ -24,7 +24,7 @@ export const facultyService = {
   getGrades: async (sectionId = 1): Promise<GradeRecord[]> => {
     try {
       const response = await apiClient.get(`/api/faculty/grades?sectionId=${sectionId}`);
-      return response.data || MOCK_GRADES;
+      return ensureArray(response.data, MOCK_GRADES);
     } catch {
       return MOCK_GRADES;
     }

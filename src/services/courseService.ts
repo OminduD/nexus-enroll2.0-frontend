@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, ensureArray } from './api';
 import { Course, CourseSection, Department, DegreeProgram, ChangeRequest } from '../types/course';
 import { MOCK_COURSES, MOCK_SECTIONS, MOCK_DEPARTMENTS, MOCK_PROGRAMS, MOCK_CHANGE_REQUESTS } from './mockData';
 
@@ -10,7 +10,7 @@ export const courseService = {
       if (departmentId) params.departmentId = departmentId;
       
       const response = await apiClient.get('/api/courses', { params });
-      return response.data?.content || response.data || MOCK_COURSES;
+      return ensureArray(response.data, MOCK_COURSES);
     } catch {
       let filtered = [...MOCK_COURSES];
       if (keyword) {
@@ -78,7 +78,7 @@ export const courseService = {
   getSections: async (semester = 'FALL', year = 2025): Promise<CourseSection[]> => {
     try {
       const response = await apiClient.get(`/api/courses/sections?semester=${semester}&year=${year}`);
-      return response.data || MOCK_SECTIONS;
+      return ensureArray(response.data, MOCK_SECTIONS);
     } catch {
       return MOCK_SECTIONS;
     }
@@ -87,7 +87,7 @@ export const courseService = {
   getDepartments: async (): Promise<Department[]> => {
     try {
       const response = await apiClient.get('/api/courses/departments');
-      return response.data || MOCK_DEPARTMENTS;
+      return ensureArray(response.data, MOCK_DEPARTMENTS);
     } catch {
       return MOCK_DEPARTMENTS;
     }
@@ -96,7 +96,7 @@ export const courseService = {
   getDegreePrograms: async (): Promise<DegreeProgram[]> => {
     try {
       const response = await apiClient.get('/api/courses/programs');
-      return response.data || MOCK_PROGRAMS;
+      return ensureArray(response.data, MOCK_PROGRAMS);
     } catch {
       return MOCK_PROGRAMS;
     }
@@ -105,7 +105,7 @@ export const courseService = {
   getChangeRequests: async (): Promise<ChangeRequest[]> => {
     try {
       const response = await apiClient.get('/api/courses/change-requests');
-      return response.data || MOCK_CHANGE_REQUESTS;
+      return ensureArray(response.data, MOCK_CHANGE_REQUESTS);
     } catch {
       return MOCK_CHANGE_REQUESTS;
     }

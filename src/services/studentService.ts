@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient, ensureArray } from './api';
 import { StudentProfile, StudentEnrollment, DegreeProgress } from '../types/student';
 import { MOCK_STUDENT_PROFILE, MOCK_STUDENT_ENROLLMENTS, MOCK_DEGREE_PROGRESS, MOCK_SECTIONS } from './mockData';
 
@@ -15,7 +15,7 @@ export const studentService = {
   getAllStudents: async (page = 0, size = 10): Promise<StudentProfile[]> => {
     try {
       const response = await apiClient.get(`/api/students?page=${page}&size=${size}`);
-      return response.data?.content || response.data || [MOCK_STUDENT_PROFILE];
+      return ensureArray(response.data, [MOCK_STUDENT_PROFILE]);
     } catch {
       return [
         MOCK_STUDENT_PROFILE,
@@ -50,7 +50,7 @@ export const studentService = {
   getSchedule: async (studentId = 1): Promise<StudentEnrollment[]> => {
     try {
       const response = await apiClient.get(`/api/students/${studentId}/schedule`);
-      return response.data || MOCK_STUDENT_ENROLLMENTS;
+      return ensureArray(response.data, MOCK_STUDENT_ENROLLMENTS);
     } catch {
       return MOCK_STUDENT_ENROLLMENTS;
     }

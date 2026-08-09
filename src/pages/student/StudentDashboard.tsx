@@ -18,20 +18,27 @@ export const StudentDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const p = await studentService.getProfile(user?.id || 1);
-      const s = await studentService.getSchedule(user?.id || 1);
-      const n = await notificationService.getUserNotifications(user?.id || 1);
-      const uc = await notificationService.getUnreadCount(user?.id || 1);
+      try {
+        const p = await studentService.getProfile(user?.id || 1);
+        const s = await studentService.getSchedule(user?.id || 1);
+        const n = await notificationService.getUserNotifications(user?.id || 1);
+        const uc = await notificationService.getUnreadCount(user?.id || 1);
 
-      setProfile(p);
-      setSchedule(s);
-      setNotifications(n.slice(0, 3));
-      setUnreadCount(uc);
+        setProfile(p);
+        const sArray = Array.isArray(s) ? s : ((s as any)?.content || []);
+        setSchedule(sArray);
+        const nArray = Array.isArray(n) ? n : ((n as any)?.content || []);
+        setNotifications(nArray.slice(0, 3));
+        setUnreadCount(typeof uc === 'number' ? uc : 0);
+      } catch (err) {
+        console.error('Failed to load student dashboard data:', err);
+      }
     };
     fetchData();
   }, [user]);
 
-  const totalCredits = schedule.reduce((acc, curr) => acc + (curr.credits || 3), 0);
+  const scheduleList = Array.isArray(schedule) ? schedule : [];
+  const totalCredits = scheduleList.reduce((acc, curr) => acc + (curr?.credits || 3), 0);
 
   return (
     <div className="space-y-6">
