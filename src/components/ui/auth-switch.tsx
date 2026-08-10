@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
   Mail,
@@ -10,7 +10,8 @@ import {
   Shield,
   GraduationCap,
   School,
-  Globe,
+  ArrowRight,
+  Info
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
@@ -31,14 +32,11 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 }) => {
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
 
-  // Role Selection State
-  const [role, setRole] = useState<Role>('STUDENT');
-
   // Sign In Form State
   const [loginIdentifier, setLoginIdentifier] = useState('john_doe');
   const [loginPassword, setLoginPassword] = useState('Password123!');
 
-  // Sign Up Form State
+  // Sign Up Form State (For Student registration only)
   const [signupUsername, setSignupUsername] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupFirstName, setSignupFirstName] = useState('');
@@ -60,15 +58,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
     if (onModeChange) onModeChange(nextState ? 'signup' : 'signin');
   };
 
-  const handleRoleSelect = (selectedRole: Role) => {
-    setRole(selectedRole);
-    if (selectedRole === 'STUDENT') {
-      setLoginIdentifier('john_doe');
-    } else if (selectedRole === 'FACULTY') {
-      setLoginIdentifier('prof_smith');
-    } else if (selectedRole === 'ADMIN') {
-      setLoginIdentifier('admin_user');
-    }
+  const handleQuickFill = (presetUsername: string) => {
+    setLoginIdentifier(presetUsername);
+    setLoginPassword('Password123!');
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -77,7 +69,8 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
     setIsSubmitting(true);
 
     try {
-      const response = await authService.login(loginIdentifier, loginPassword, role);
+      // Automatic role detection from authentication service response
+      const response = await authService.login(loginIdentifier, loginPassword);
       login(response.token, {
         id: response.userId,
         username: response.username,
@@ -89,6 +82,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
       showToast(`Welcome back, ${response.firstName}! Logged in as ${response.role}.`, 'success');
 
+      // Direct redirection to the appropriate portal dashboard
       const dest =
         response.role === 'ADMIN'
           ? '/admin/dashboard'
@@ -111,18 +105,19 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Public signup is strictly for Student accounts
       await authService.register({
         username: signupUsername || signupEmail.split('@')[0],
         email: signupEmail,
         password: signupPassword,
         firstName: signupFirstName,
         lastName: signupLastName,
-        role: role,
+        role: 'STUDENT',
       });
 
-      showToast('Account created successfully!', 'success');
+      showToast('Student account created successfully!', 'success');
 
-      const response = await authService.login(signupUsername || signupEmail, signupPassword, role);
+      const response = await authService.login(signupUsername || signupEmail, signupPassword);
       login(response.token, {
         id: response.userId,
         username: response.username,
@@ -132,14 +127,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
         role: response.role,
       });
 
-      const dest =
-        role === 'ADMIN'
-          ? '/admin/dashboard'
-          : role === 'FACULTY'
-          ? '/faculty/dashboard'
-          : '/student/dashboard';
-
-      navigate(dest);
+      navigate('/student/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
       showToast('Account creation failed.', 'error');
@@ -174,14 +162,14 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             isSignUp ? 'bg-[#006666] text-white shadow-md' : 'text-slate-600'
           )}
         >
-          <UserPlus className="w-4 h-4" /> Create Account
+          <UserPlus className="w-4 h-4" /> Create Student Account
         </button>
       </div>
 
       {/* Main Split Sliding Auth Card */}
       <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 min-h-[620px] overflow-hidden">
-        
-        {/* ==================== SIGN UP FORM PANEL ==================== */}
+
+        {/* ==================== SIGN UP FORM PANEL (STUDENT ONLY) ==================== */}
         <div
           className={cn(
             'absolute top-0 left-0 h-full w-full md:w-1/2 p-6 sm:p-10 flex flex-col justify-between transition-all duration-700 ease-in-out',
@@ -192,32 +180,16 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
         >
           <div className="space-y-4">
             <div className="text-center space-y-1">
-              <h2 className="text-2xl sm:text-3xl font-black text-[#333333]">Create Account</h2>
-              <p className="text-xs text-slate-500">Use your university details for registration</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#333333]">Student Registration</h2>
+              <p className="text-xs text-slate-500">Create your student academic account</p>
             </div>
 
-            {/* Role Preset Tabs */}
-            <div className="bg-slate-100 p-1 rounded-2xl flex items-center justify-between border border-slate-200">
-              {(
-                [
-                  { id: 'STUDENT', label: 'Student', icon: School },
-                  { id: 'FACULTY', label: 'Faculty', icon: GraduationCap },
-                  { id: 'ADMIN', label: 'Admin', icon: Shield },
-                ] as const
-              ).map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => handleRoleSelect(id as Role)}
-                  className={cn(
-                    'flex-1 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1',
-                    role === id ? 'bg-[#006666] text-white shadow-sm' : 'text-slate-500 hover:text-[#333333]'
-                  )}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label}
-                </button>
-              ))}
+            {/* Public Registration Scope Information Banner */}
+            <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-xs flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
+              <span className="leading-tight">
+                Public registration is for <strong>Student Accounts</strong> only. Faculty and Administrator accounts are provisioned in the Admin Portal.
+              </span>
             </div>
 
             {error && (
@@ -253,7 +225,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-600 mb-1">Username</label>
+                <label className="block font-bold text-slate-600 mb-1">Student Username</label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
                   <input
@@ -268,7 +240,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-slate-600 mb-1">Email</label>
+                <label className="block font-bold text-slate-600 mb-1">Student Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
                   <input
@@ -306,7 +278,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <UserPlus className="w-4 h-4" /> Create {role} Account
+                    <UserPlus className="w-4 h-4" /> Create Student Account
                   </>
                 )}
               </button>
@@ -314,7 +286,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           </div>
         </div>
 
-        {/* ==================== SIGN IN FORM PANEL ==================== */}
+        {/* ==================== SIGN IN FORM PANEL (DIRECT REDIRECTION) ==================== */}
         <div
           className={cn(
             'absolute top-0 left-0 h-full w-full md:w-1/2 p-6 sm:p-10 flex flex-col justify-between transition-all duration-700 ease-in-out z-10',
@@ -326,31 +298,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           <div className="space-y-4">
             <div className="text-center space-y-1">
               <h2 className="text-2xl sm:text-3xl font-black text-[#333333]">Sign In</h2>
-              <p className="text-xs text-slate-500">Access your academic account & dashboard</p>
-            </div>
-
-            {/* Role Selector Tabs */}
-            <div className="bg-slate-100 p-1 rounded-2xl flex items-center justify-between border border-slate-200">
-              {(
-                [
-                  { id: 'STUDENT', label: 'Student', icon: School },
-                  { id: 'FACULTY', label: 'Faculty', icon: GraduationCap },
-                  { id: 'ADMIN', label: 'Admin', icon: Shield },
-                ] as const
-              ).map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => handleRoleSelect(id as Role)}
-                  className={cn(
-                    'flex-1 py-1.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1',
-                    role === id ? 'bg-[#006666] text-white shadow-sm' : 'text-slate-500 hover:text-[#333333]'
-                  )}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {label}
-                </button>
-              ))}
+              <p className="text-xs text-slate-500">Enter your credentials to enter your portal</p>
             </div>
 
             {error && (
@@ -367,7 +315,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="john_doe or john.doe@nexus.edu"
+                    placeholder="john_doe, prof_smith, or admin_user"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
@@ -408,26 +356,23 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
-                    <LogIn className="w-4 h-4" /> Sign In to {role} Portal
+                    <LogIn className="w-4 h-4" /> Sign In to Portal
                   </>
                 )}
               </button>
             </form>
           </div>
 
-          {/* Quick Demo Accounts Selection */}
+          {/* Demo Account Quick-Fill Selector */}
           <div className="pt-4 border-t border-slate-100 space-y-2">
             <div className="flex items-center gap-1 text-xs font-bold text-[#006666]">
-              <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Select Account:
+              <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Test Logins:
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => handleRoleSelect('STUDENT')}
-                className={cn(
-                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
-                  role === 'STUDENT' ? "bg-teal-50 border-teal-500 ring-2 ring-teal-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                )}
+                onClick={() => handleQuickFill('john_doe')}
+                className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-teal-50 hover:border-teal-400 text-left transition-all flex items-center gap-2"
               >
                 <img
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
@@ -436,17 +381,14 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Student</p>
-                  <span className="text-[9px] text-slate-400 font-mono">John</span>
+                  <span className="text-[9px] text-slate-500 font-mono">john_doe</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleRoleSelect('FACULTY')}
-                className={cn(
-                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
-                  role === 'FACULTY' ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                )}
+                onClick={() => handleQuickFill('prof_smith')}
+                className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 text-left transition-all flex items-center gap-2"
               >
                 <img
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150"
@@ -455,17 +397,14 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Faculty</p>
-                  <span className="text-[9px] text-slate-400 font-mono">Prof. Smith</span>
+                  <span className="text-[9px] text-slate-500 font-mono">prof_smith</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleRoleSelect('ADMIN')}
-                className={cn(
-                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
-                  role === 'ADMIN' ? "bg-rose-50 border-rose-500 ring-2 ring-rose-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                )}
+                onClick={() => handleQuickFill('admin_user')}
+                className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-400 text-left transition-all flex items-center gap-2"
               >
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150"
@@ -474,7 +413,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Admin</p>
-                  <span className="text-[9px] text-slate-400 font-mono">Dr. Vance</span>
+                  <span className="text-[9px] text-slate-500 font-mono">admin_user</span>
                 </div>
               </button>
             </div>
@@ -488,14 +427,12 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             isSignUp ? '-translate-x-full' : 'translate-x-0'
           )}
         >
-          {/* Double Width Overlay Curtain */}
           <div
             className={cn(
               'bg-gradient-to-br from-[#006666] via-teal-800 to-teal-900 text-white relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out',
               isSignUp ? 'translate-x-1/2' : 'translate-x-0'
             )}
           >
-            {/* Background Texture & Glow */}
             <img
               src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1000&q=80"
               alt="Campus"
@@ -522,7 +459,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   Welcome Back!
                 </h2>
                 <p className="text-xs sm:text-sm text-teal-100 max-w-xs leading-relaxed mx-auto">
-                  To keep connected with your courses, timetable, and faculty requests, please log in with your credentials.
+                  Sign in with your username & password to enter your portal.
                 </p>
               </div>
 
@@ -550,10 +487,10 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
               <div className="space-y-4 my-auto">
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-                  Hello, Friend!
+                  Student Registration
                 </h2>
                 <p className="text-xs sm:text-sm text-teal-100 max-w-xs leading-relaxed mx-auto">
-                  Register your account details and start managing your course enrollments and academic standing with NexusEnroll.
+                  New student? Register your account to access course enrollment and degree tracking.
                 </p>
               </div>
 
@@ -562,7 +499,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 onClick={handleToggle}
                 className="px-8 py-3 rounded-2xl bg-transparent border-2 border-white text-white text-xs font-black uppercase tracking-widest hover:bg-white hover:text-[#006666] transition-all shadow-lg hover:scale-105 active:scale-95"
               >
-                Sign Up
+                Student Sign Up
               </button>
             </div>
 

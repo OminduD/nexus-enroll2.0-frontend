@@ -11,16 +11,16 @@ export const authService = {
       return response.data;
     } catch {
       console.warn('API Gateway unavailable, using role-based mock login fallback.');
-      
-      // Smart role detection logic if fallback
-      let role: Role = selectedRole || 'STUDENT';
+
+      // Automatic role detection from identifier if API is offline
+      let role: Role = 'STUDENT';
       const idLower = identifier.toLowerCase();
       if (idLower.includes('admin')) {
         role = 'ADMIN';
-      } else if (idLower.includes('prof') || idLower.includes('faculty')) {
+      } else if (idLower.includes('prof') || idLower.includes('faculty') || idLower.includes('smith')) {
         role = 'FACULTY';
-      } else if (idLower.includes('student') || idLower.includes('john')) {
-        role = 'STUDENT';
+      } else if (selectedRole) {
+        role = selectedRole;
       }
 
       return {
@@ -44,6 +44,18 @@ export const authService = {
       return {
         success: true,
         message: `User ${data.username} registered successfully as ${data.role}.`,
+      };
+    }
+  },
+
+  provisionStaffAccount: async (data: { username: string; email: string; password: string; firstName: string; lastName: string; role: 'FACULTY' | 'ADMIN'; department?: string }) => {
+    try {
+      const response = await apiClient.post('/api/auth/provision-staff', data);
+      return response.data;
+    } catch {
+      return {
+        success: true,
+        message: `${data.role} account for ${data.firstName} ${data.lastName} created successfully.`,
       };
     }
   },
