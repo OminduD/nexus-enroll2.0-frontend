@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, Search, Shield, ShieldOff, Eye, UserPlus, GraduationCap, School, CheckCircle2, Lock, Mail, User } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { authService } from '../../services/authService';
+import { addStoredUser } from '../../services/localStore';
 import { StudentProfile } from '../../types/student';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
@@ -41,6 +42,9 @@ export const UserDirectoryPage: React.FC = () => {
       }
     };
     loadUsers();
+    const handleUpdate = () => loadUsers();
+    window.addEventListener('nexus_users_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_users_updated', handleUpdate);
   }, []);
 
   const handleToggleUserStatus = (student: StudentProfile) => {
@@ -67,6 +71,22 @@ export const UserDirectoryPage: React.FC = () => {
         role: staffRole,
         department: staffDepartment,
       });
+
+      const newStaffProfile: StudentProfile = {
+        id: Date.now(),
+        userId: Date.now(),
+        studentIdNumber: `${staffRole === 'FACULTY' ? 'FAC' : 'ADM'}-${Date.now().toString().slice(-4)}`,
+        firstName: staffFirstName,
+        lastName: staffLastName,
+        email: staffEmail,
+        major: staffDepartment,
+        enrollmentYear: 2025,
+        academicStanding: 'GOOD_STANDING',
+        gpa: 4.00,
+      };
+
+      addStoredUser(newStaffProfile);
+      setStudents((prev) => [newStaffProfile, ...prev]);
 
       showToast(
         `${staffRole === 'FACULTY' ? 'Faculty' : 'Administrator'} account for ${staffFirstName} ${staffLastName} created successfully!`,
@@ -171,54 +191,73 @@ export const UserDirectoryPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredStudents.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-3.5 font-mono font-bold text-teal-700">{s.studentIdNumber}</td>
-                    <td className="p-3.5 font-bold text-[#333333]">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(s.firstName + ' ' + s.lastName)}&background=006666&color=fff&rounded=true`}
-                          alt={`${s.firstName} ${s.lastName}`}
-                          className="w-6 h-6 rounded-full shrink-0 shadow-sm"
-                        />
-                        <span>{s.firstName} {s.lastName}</span>
-                      </div>
-                    </td>
-                    <td className="p-3.5 font-medium">{s.email}</td>
-                    <td className="p-3.5 font-medium">{s.major}</td>
-                    <td className="p-3.5 font-bold text-[#333333]">{s.gpa}</td>
-                    <td className="p-3.5">
-                      <Badge variant={s.academicStanding === 'SUSPENDED' ? 'danger' : 'success'}>
-                        {s.academicStanding}
-                      </Badge>
-                    </td>
-                    <td className="p-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedStudent(s);
-                            setIsProfileModalOpen(true);
-                          }}
-                          className="p-1.5 rounded-lg bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-600 transition-colors"
-                          title="View Profile Details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleToggleUserStatus(s)}
-                          className={`p-1.5 rounded-lg transition-colors ${
-                            s.academicStanding === 'SUSPENDED'
-                              ? 'bg-teal-50 text-teal-700 hover:bg-teal-700 hover:text-white'
-                              : 'bg-coral-50 text-coral-600 hover:bg-coral-600 hover:text-white'
-                          }`}
-                          title={s.academicStanding === 'SUSPENDED' ? 'Reactivate Account' : 'Deactivate Account'}
-                        >
-                          {s.academicStanding === 'SUSPENDED' ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filteredStudents.map((s: any) => {
+                  const firstName = s.firstName || s.user?.firstName || s.name?.split(' ')[0] || 'User';
+                  const lastName = s.lastName || s.user?.lastName || s.name?.split(' ')[1] || 'Account';
+                  const email = s.email || s.user?.email || `${firstName.toLowerCase()}@nexus.edu`;
+                  const studentId = s.studentIdNumber || s.studentId || s.idNumber || `NEX-2024-${s.id || 1000}`;
+                  const major = s.major || s.majorName || s.department || 'Computer Science & Engineering';
+                  const standing = s.academicStanding || s.status || s.standing || 'GOOD_STANDING';
+                  const gpa = s.gpa ?? 3.5;
+
+                  return (
+                    <tr key={s.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-3.5 font-mono font-bold text-teal-700">{studentId}</td>
+                      <td className="p-3.5 font-bold text-[#333333]">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(firstName + ' ' + lastName)}&background=006666&color=fff&rounded=true`}
+                            alt={`${firstName} ${lastName}`}
+                            className="w-6 h-6 rounded-full shrink-0 shadow-sm"
+                          />
+                          <span>{firstName} {lastName}</span>
+                        </div>
+                      </td>
+                      <td className="p-3.5 font-medium">{email}</td>
+                      <td className="p-3.5 font-medium">{major}</td>
+                      <td className="p-3.5 font-bold text-[#333333]">{gpa}</td>
+                      <td className="p-3.5">
+                        <Badge variant={standing === 'SUSPENDED' ? 'danger' : 'success'}>
+                          {standing}
+                        </Badge>
+                      </td>
+                      <td className="p-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => {
+                              setSelectedStudent({
+                                ...s,
+                                firstName,
+                                lastName,
+                                email,
+                                studentIdNumber: studentId,
+                                major,
+                                academicStanding: standing,
+                                gpa,
+                              });
+                              setIsProfileModalOpen(true);
+                            }}
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-teal-700 hover:text-white text-slate-600 transition-colors"
+                            title="View Profile Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleToggleUserStatus(s)}
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              standing === 'SUSPENDED'
+                                ? 'bg-teal-50 text-teal-700 hover:bg-teal-700 hover:text-white'
+                                : 'bg-coral-50 text-coral-600 hover:bg-coral-600 hover:text-white'
+                            }`}
+                            title={standing === 'SUSPENDED' ? 'Reactivate Account' : 'Deactivate Account'}
+                          >
+                            {standing === 'SUSPENDED' ? <Shield className="w-4 h-4" /> : <ShieldOff className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

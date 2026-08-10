@@ -27,6 +27,9 @@ export const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     loadNotifications();
+    const handleUpdate = () => loadNotifications();
+    window.addEventListener('nexus_notifications_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_notifications_updated', handleUpdate);
   }, [user]);
 
   const handleMarkAllRead = async () => {

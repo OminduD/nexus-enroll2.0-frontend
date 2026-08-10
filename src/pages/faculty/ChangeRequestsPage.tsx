@@ -35,6 +35,9 @@ export const ChangeRequestsPage: React.FC = () => {
 
   useEffect(() => {
     loadRequests();
+    const handleUpdate = () => loadRequests();
+    window.addEventListener('nexus_change_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_change_requests_updated', handleUpdate);
   }, []);
 
   const handleSubmitRequest = async () => {

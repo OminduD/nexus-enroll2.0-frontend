@@ -25,6 +25,9 @@ export const GradeApprovalsPage: React.FC = () => {
 
   useEffect(() => {
     loadPendingGrades();
+    const handleUpdate = () => loadPendingGrades();
+    window.addEventListener('nexus_grades_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_grades_updated', handleUpdate);
   }, []);
 
   const handleApprove = async (gradeId: number) => {
@@ -109,7 +112,7 @@ export const GradeApprovalsPage: React.FC = () => {
                     </Badge>
                   </td>
                   <td className="p-3.5 text-right">
-                    {g.status === 'PENDING' ? (
+                    {g.status === 'PENDING' || g.status === 'DRAFT' ? (
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleReject(g.id)}

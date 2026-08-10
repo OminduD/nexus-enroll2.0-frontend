@@ -17,9 +17,19 @@ export const apiClient = axios.create({
 });
 
 // Use in service catch blocks: `catch (error) { return withMockFallback(error, MOCK_X); }`
-// Returns mockValue if fallback enabled or when endpoint returns 404/timeout so UI stays functional
+// Returns mockValue if fallback enabled or when endpoint returns error/timeout so UI stays functional
 export function withMockFallback<T>(error: any, mockValue: T): T {
-  if (USE_MOCK_FALLBACK || error?.response?.status === 404 || error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
+  if (
+    USE_MOCK_FALLBACK ||
+    !error?.response ||
+    error?.response?.status === 404 ||
+    error?.response?.status === 500 ||
+    error?.response?.status === 400 ||
+    error?.code === 'ECONNABORTED' ||
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('timeout') ||
+    error?.message?.includes('Network Error')
+  ) {
     return mockValue;
   }
   throw error;

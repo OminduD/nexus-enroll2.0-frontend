@@ -1,6 +1,7 @@
 import { apiClient, ensureArray, withMockFallback } from './api';
 import { FacultyProfile, ClassRosterStudent, GradeRecord } from '../types/faculty';
 import { MOCK_FACULTY_PROFILE, MOCK_ROSTER_STUDENTS, MOCK_GRADES } from './mockData';
+import { getStoredGrades, addStoredGrade, updateStoredGradeStatus } from './localStore';
 
 export const facultyService = {
   getProfile: async (userId = 1): Promise<FacultyProfile> => {
@@ -24,82 +25,53 @@ export const facultyService = {
   getGrades: async (sectionId = 1): Promise<GradeRecord[]> => {
     try {
       const response = await apiClient.get(`/api/faculty/grades?sectionId=${sectionId}`);
-      return ensureArray(response.data, MOCK_GRADES);
+      const data = ensureArray<GradeRecord>(response.data);
+      return data.length > 0 ? data : getStoredGrades();
     } catch (error) {
-      return withMockFallback(error, MOCK_GRADES);
+      return withMockFallback(error, getStoredGrades());
     }
   },
 
   saveDraftGrade: async (gradeData: Partial<GradeRecord>): Promise<GradeRecord> => {
     try {
       const response = await apiClient.post('/api/faculty/grades/draft', gradeData);
+      addStoredGrade(gradeData);
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const newGrade: GradeRecord = {
-          id: Date.now(),
-          enrollmentId: gradeData.enrollmentId || 101,
-          studentId: gradeData.studentId || 1,
-          studentName: gradeData.studentName || 'Student Name',
-          sectionId: gradeData.sectionId || 1,
-          courseCode: gradeData.courseCode || 'CS-101',
-          assignmentTitle: gradeData.assignmentTitle || 'Assignment',
-          pointsEarned: gradeData.pointsEarned || 85,
-          maxPoints: gradeData.maxPoints || 100,
-          letterGrade: gradeData.letterGrade || 'B',
-          comments: gradeData.comments || 'Draft grade',
-          status: 'DRAFT',
-          gradedBy: 'prof_smith',
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        MOCK_GRADES.push(newGrade);
-        return newGrade;
-      })());
+      return withMockFallback(error, addStoredGrade(gradeData));
     }
   },
 
   submitGrade: async (gradeId: number) => {
     try {
       const response = await apiClient.post('/api/faculty/grades/submit', { gradeId });
+      updateStoredGradeStatus(gradeId, 'PENDING');
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const grade = MOCK_GRADES.find(g => g.id === gradeId);
-        if (grade) {
-          grade.status = 'PENDING';
-        }
-        return { success: true };
-      })());
+      updateStoredGradeStatus(gradeId, 'PENDING');
+      return withMockFallback(error, { success: true });
     }
   },
 
   approveGrade: async (gradeId: number) => {
     try {
       const response = await apiClient.post('/api/faculty/grades/approve', { gradeId });
+      updateStoredGradeStatus(gradeId, 'APPROVED');
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const grade = MOCK_GRADES.find(g => g.id === gradeId);
-        if (grade) {
-          grade.status = 'APPROVED';
-        }
-        return { success: true };
-      })());
+      updateStoredGradeStatus(gradeId, 'APPROVED');
+      return withMockFallback(error, { success: true });
     }
   },
 
   rejectGrade: async (gradeId: number) => {
     try {
       const response = await apiClient.post('/api/faculty/grades/reject', { gradeId });
+      updateStoredGradeStatus(gradeId, 'REJECTED');
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const grade = MOCK_GRADES.find(g => g.id === gradeId);
-        if (grade) {
-          grade.status = 'DRAFT';
-        }
-        return { success: true };
-      })());
+      updateStoredGradeStatus(gradeId, 'REJECTED');
+      return withMockFallback(error, { success: true });
     }
   }
 };

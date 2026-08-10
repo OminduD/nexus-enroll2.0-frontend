@@ -31,6 +31,9 @@ export const AdminChangeRequestsPage: React.FC = () => {
 
   useEffect(() => {
     loadRequests();
+    const handleUpdate = () => loadRequests();
+    window.addEventListener('nexus_change_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_change_requests_updated', handleUpdate);
   }, []);
 
   const handleOpenActionModal = (req: ChangeRequest, action: 'APPROVE' | 'REJECT') => {
