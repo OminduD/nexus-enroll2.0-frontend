@@ -3,10 +3,10 @@ import { FacultyProfile, ClassRosterStudent, GradeRecord } from '../types/facult
 import { MOCK_FACULTY_PROFILE, MOCK_ROSTER_STUDENTS, MOCK_GRADES } from './mockData';
 
 export const facultyService = {
-  getProfile: async (facultyId = 1): Promise<FacultyProfile> => {
+  getProfile: async (userId = 1): Promise<FacultyProfile> => {
     try {
-      const response = await apiClient.get(`/api/faculty/${facultyId}`);
-      return response.data || MOCK_FACULTY_PROFILE;
+      const response = await apiClient.get(`/api/faculty/user/${userId}`);
+      return response.data.data || response.data || MOCK_FACULTY_PROFILE;
     } catch {
       return MOCK_FACULTY_PROFILE;
     }

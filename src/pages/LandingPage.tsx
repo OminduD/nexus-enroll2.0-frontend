@@ -125,9 +125,9 @@ export const LandingPage: React.FC = () => {
       (selectedCategory === 'GRAD' && course.level === 'Graduate');
 
     const matchesSearch =
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.dept.toLowerCase().includes(searchQuery.toLowerCase());
+      (course.title?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (course.code?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (course.dept?.toLowerCase() || '').includes(searchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
   });

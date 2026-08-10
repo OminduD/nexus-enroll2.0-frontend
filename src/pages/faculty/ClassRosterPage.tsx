@@ -34,9 +34,9 @@ export const ClassRosterPage: React.FC = () => {
 
   const filteredRoster = roster.filter(
     (s) =>
-      s.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.studentIdNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      (s.studentName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (s.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (s.studentIdNumber?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (

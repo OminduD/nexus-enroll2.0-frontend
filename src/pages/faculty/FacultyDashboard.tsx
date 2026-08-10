@@ -71,10 +71,10 @@ export const FacultyDashboard: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-                Welcome, <span className="text-coral-300">{profile?.title || 'Prof.'} {user?.lastName || 'Smith'}!</span>
+                Welcome, <span className="text-coral-300">{profile?.title || 'NULL'} {user?.lastName || 'NULL'}!</span>
               </h1>
               <p className="text-xs sm:text-sm text-teal-100/90 max-w-2xl leading-relaxed mt-1">
-                Department of {profile?.department} • Office Location: <span className="font-bold text-white px-2.5 py-0.5 bg-white/15 rounded-lg border border-white/20">{profile?.officeLocation}</span>
+                Department of {profile?.department || 'NULL'} • Office Location: <span className="font-bold text-white px-2.5 py-0.5 bg-white/15 rounded-lg border border-white/20">{profile?.officeLocation || 'NULL'}</span>
               </p>
             </div>
 
@@ -187,19 +187,19 @@ export const FacultyDashboard: React.FC = () => {
               <div className="space-y-3.5 text-xs text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700">
                   <Users className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                  <span>Department: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.department}</span></span>
+                  <span>Department: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.department || 'NULL'}</span></span>
                 </div>
                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700">
                   <MapPin className="w-4 h-4 text-coral-500 shrink-0" />
-                  <span>Office: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.officeLocation}</span></span>
+                  <span>Office: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.officeLocation || 'NULL'}</span></span>
                 </div>
                 <div className="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/60 dark:border-slate-700">
                   <Mail className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
-                  <span>Email: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.email}</span></span>
+                  <span>Email: <span className="font-bold text-slate-900 dark:text-slate-100">{profile?.email || 'NULL'}</span></span>
                 </div>
                 <div className="pt-1 flex items-center justify-between">
-                  <Badge variant="primary">{profile?.title}</Badge>
-                  <span className="text-[10px] font-mono text-slate-400">ID #{user?.id || 2}</span>
+                  <Badge variant="primary">{profile?.title || 'NULL'}</Badge>
+                  <span className="text-[10px] font-mono text-slate-400">ID #{user?.id || 'NULL'}</span>
                 </div>
               </div>
             </div>
@@ -230,11 +230,11 @@ export const FacultyDashboard: React.FC = () => {
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <img 
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(g.studentName || 'Student')}&background=006666&color=fff&rounded=true`}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(g.studentName || 'NULL')}&background=006666&color=fff&rounded=true`}
                           alt={g.studentName}
                           className="w-6 h-6 rounded-full shrink-0 shadow-sm"
                         />
-                        <span className="font-extrabold text-slate-900 dark:text-slate-100">{g.studentName}</span>
+                        <span className="font-extrabold text-slate-900 dark:text-slate-100">{g.studentName || 'NULL'}</span>
                         <Badge
                           variant={g.status === 'APPROVED' ? 'success' : g.status === 'PENDING' ? 'warning' : 'danger'}
                         >
@@ -242,7 +242,7 @@ export const FacultyDashboard: React.FC = () => {
                         </Badge>
                       </div>
                       <p className="text-slate-500 dark:text-slate-400">
-                        {g.courseCode} • {g.assignmentTitle}: Score <span className="font-mono font-extrabold text-teal-700 dark:text-teal-400">{g.pointsEarned}/{g.maxPoints}</span> ({g.letterGrade})
+                        {g.courseCode || 'NULL'} • {g.assignmentTitle || 'NULL'}: Score <span className="font-mono font-extrabold text-teal-700 dark:text-teal-400">{g.pointsEarned ?? 'NULL'}/{g.maxPoints ?? 'NULL'}</span> ({g.letterGrade || 'NULL'})
                       </p>
                     </div>
 

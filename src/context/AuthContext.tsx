@@ -20,8 +20,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('nexus_token');
-    const storedUser = localStorage.getItem('nexus_user');
+    let storedToken = localStorage.getItem('nexus_token');
+    let storedUser = localStorage.getItem('nexus_user');
+
+    if (storedToken === 'mock-jwt-token-initial' || (storedToken && storedToken.startsWith('mock-jwt-token-'))) {
+      // Clear out the old mock token to prevent auto-login
+      localStorage.removeItem('nexus_token');
+      localStorage.removeItem('nexus_user');
+      storedToken = null;
+      storedUser = null;
+    }
 
     if (storedToken && storedUser) {
       try {
@@ -36,22 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('nexus_token');
         localStorage.removeItem('nexus_user');
       }
-    } else {
-      const defaultUser: User = {
-        id: 1,
-        username: 'john_doe',
-        email: 'john.doe@nexus.edu',
-        firstName: 'John',
-        lastName: 'Doe',
-        role: 'STUDENT',
-        avatarUrl: getDefaultAvatarForRole('STUDENT'),
-      };
-      const defaultToken = 'mock-jwt-token-initial';
-      setUser(defaultUser);
-      setToken(defaultToken);
-      localStorage.setItem('nexus_token', defaultToken);
-      localStorage.setItem('nexus_user', JSON.stringify(defaultUser));
     }
+    // No stored session, just continue as unauthenticated
     setIsLoading(false);
   }, []);
 

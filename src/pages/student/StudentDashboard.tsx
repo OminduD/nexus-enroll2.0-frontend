@@ -49,7 +49,8 @@ export const StudentDashboard: React.FC = () => {
     const fetchData = async () => {
       try {
         const p = await studentService.getProfile(user?.id || 1);
-        const s = await studentService.getSchedule(user?.id || 1);
+        const actualStudentId = p?.id || user?.id || 1;
+        const s = await studentService.getSchedule(actualStudentId);
         const n = await notificationService.getUserNotifications(user?.id || 1);
         const uc = await notificationService.getUnreadCount(user?.id || 1);
 
@@ -67,7 +68,7 @@ export const StudentDashboard: React.FC = () => {
   }, [user]);
 
   const scheduleList = Array.isArray(schedule) ? schedule : [];
-  const totalCredits = scheduleList.reduce((acc, curr) => acc + (curr?.credits || 3), 0);
+  const totalCredits = scheduleList.reduce((acc, curr) => acc + (curr?.credits || 0), 0);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -124,7 +125,7 @@ export const StudentDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-coral-300 shadow-xs">
-                <Zap className="w-3.5 h-3.5 text-coral-400 animate-pulse" /> Standing: {profile?.academicStanding || 'GOOD STANDING'}
+                <Zap className="w-3.5 h-3.5 text-coral-400 animate-pulse" /> Standing: {profile?.academicStanding || 'NULL'}
               </div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-mono font-medium text-teal-200">
                 <Clock className="w-3.5 h-3.5 text-teal-300" /> {currentTime}
@@ -132,7 +133,7 @@ export const StudentDashboard: React.FC = () => {
             </div>
 
             <div className="text-xs font-mono font-medium text-teal-200/90 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/15 shadow-xs">
-              ID: <span className="font-extrabold text-white">{profile?.studentIdNumber || 'NEX-2024-8842'}</span>
+              ID: <span className="font-extrabold text-white">{profile?.studentIdNumber || 'NULL'}</span>
             </div>
           </div>
 
@@ -140,10 +141,10 @@ export const StudentDashboard: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-                {getGreeting()}, <span className="text-coral-300">{user?.firstName || 'Student'}!</span>
+                {getGreeting()}, <span className="text-coral-300">{user?.firstName || 'NULL'}!</span>
               </h1>
               <p className="text-xs sm:text-sm text-teal-100/90 max-w-2xl leading-relaxed mt-1">
-                Enrolled in <span className="font-bold text-white">{profile?.major || 'Computer Science'} B.S. Program</span> • Semester Term: <span className="text-teal-300 font-semibold">Fall 2025</span>
+                Enrolled in <span className="font-bold text-white">{profile?.major || 'NULL'} B.S. Program</span> • Semester Term: <span className="text-teal-300 font-semibold">Fall 2025</span>
               </p>
             </div>
 
@@ -225,7 +226,7 @@ export const StudentDashboard: React.FC = () => {
         />
         <StatCard
           title="Cumulative GPA"
-          value={profile?.gpa || '3.82'}
+          value={profile?.gpa || 'NULL'}
           subtitle="Scale 4.00 (Honor List)"
           icon={Award}
           trend="+0.12 this term"
@@ -267,14 +268,14 @@ export const StudentDashboard: React.FC = () => {
                         <Badge variant="success">IN 45 MINS</Badge>
                       </div>
                       <p className="text-base font-black text-white mt-0.5">
-                        {nextClass.courseCode} — {nextClass.courseTitle}
+                        {nextClass.courseCode || 'NULL'} — {nextClass.courseTitle || 'NULL'}
                       </p>
                     </div>
                   </div>
                   <div className="text-xs text-teal-100 sm:text-right z-10">
-                    <p className="font-extrabold text-white text-sm">{nextClass.scheduleTime}</p>
+                    <p className="font-extrabold text-white text-sm">{nextClass.scheduleTime || 'NULL'}</p>
                     <p className="flex items-center gap-1 text-teal-200 sm:justify-end mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-coral-400" /> {nextClass.location}
+                      <MapPin className="w-3.5 h-3.5 text-coral-400" /> {nextClass.location || 'NULL'}
                     </p>
                   </div>
                 </div>
@@ -308,20 +309,20 @@ export const StudentDashboard: React.FC = () => {
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-black text-sm text-teal-700 dark:text-teal-400">{c.courseCode}</span>
-                            <Badge variant={c.status === 'ENROLLED' ? 'success' : 'warning'}>{c.status}</Badge>
-                            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">{c.credits} Credits</span>
+                            <span className="font-mono font-black text-sm text-teal-700 dark:text-teal-400">{c.courseCode || 'NULL'}</span>
+                            <Badge variant={c.status === 'ENROLLED' ? 'success' : 'warning'}>{c.status || 'NULL'}</Badge>
+                            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">{c.credits || 0} Credits</span>
                           </div>
-                          <p className="text-xs font-extrabold">{c.courseTitle}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Instructor: {c.instructorName}</p>
+                          <p className="text-xs font-extrabold">{c.courseTitle || 'NULL'}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Instructor: {c.instructorName || 'NULL'}</p>
                         </div>
 
                         <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                           <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700 shadow-2xs">
-                            <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> {c.scheduleDays} {c.scheduleTime}
+                            <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" /> {c.scheduleDays || 'NULL'} {c.scheduleTime || 'NULL'}
                           </div>
                           <div className="flex items-center gap-1.5 font-medium pt-0.5">
-                            <MapPin className="w-3.5 h-3.5 text-coral-500" /> {c.location}
+                            <MapPin className="w-3.5 h-3.5 text-coral-500" /> {c.location || 'NULL'}
                           </div>
                         </div>
                       </div>
@@ -466,13 +467,13 @@ export const StudentDashboard: React.FC = () => {
                             key={`${dayShort}-${c.id}`}
                             className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-teal-500/30 shadow-2xs space-y-1 hover:border-teal-500 transition-colors"
                           >
-                            <span className="font-mono font-black text-xs text-teal-700 dark:text-teal-400">{c.courseCode}</span>
-                            <p className="text-[11px] font-bold line-clamp-1">{c.courseTitle}</p>
+                            <span className="font-mono font-black text-xs text-teal-700 dark:text-teal-400">{c.courseCode || 'NULL'}</span>
+                            <p className="text-[11px] font-bold line-clamp-1">{c.courseTitle || 'NULL'}</p>
                             <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                              <Clock className="w-3 h-3 text-coral-500" /> {c.scheduleTime}
+                              <Clock className="w-3 h-3 text-coral-500" /> {c.scheduleTime || 'NULL'}
                             </div>
                             <div className="flex items-center gap-1 text-[10px] text-slate-400">
-                              <MapPin className="w-3 h-3 text-teal-600" /> {c.location}
+                              <MapPin className="w-3 h-3 text-teal-600" /> {c.location || 'NULL'}
                             </div>
                           </div>
                         ))

@@ -11,7 +11,9 @@ export const DegreeAuditPage: React.FC = () => {
 
   useEffect(() => {
     const loadProgress = async () => {
-      const data = await studentService.getDegreeProgress(user?.id || 1, 1);
+      const p = await studentService.getProfile(user?.id || 1);
+      const actualStudentId = p?.id || user?.id || 1;
+      const data = await studentService.getDegreeProgress(actualStudentId, 1);
       setProgress(data);
     };
     loadProgress();

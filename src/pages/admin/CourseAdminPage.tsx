@@ -88,8 +88,8 @@ export const CourseAdminPage: React.FC = () => {
 
   const filteredCourses = courses.filter(
     (c) =>
-      c.courseCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.title.toLowerCase().includes(searchQuery.toLowerCase())
+      (c.courseCode?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (c.title?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (

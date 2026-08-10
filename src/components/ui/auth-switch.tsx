@@ -11,7 +11,9 @@ import {
   GraduationCap,
   School,
   ArrowRight,
-  Info
+  Info,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
@@ -33,8 +35,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
 
   // Sign In Form State
-  const [loginIdentifier, setLoginIdentifier] = useState('john_doe');
+  const [loginIdentifier, setLoginIdentifier] = useState('student1');
   const [loginPassword, setLoginPassword] = useState('Password123!');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Sign Up Form State (For Student registration only)
   const [signupUsername, setSignupUsername] = useState('');
@@ -231,7 +234,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="john_doe"
+                    placeholder="student1"
                     value={signupUsername}
                     onChange={(e) => setSignupUsername(e.target.value)}
                     className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
@@ -315,7 +318,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   <input
                     type="text"
                     required
-                    placeholder="john_doe, prof_smith, or admin_user"
+                    placeholder="student1, faculty1, or admin"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
@@ -326,24 +329,28 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block font-bold text-slate-600">Password</label>
-                  <button
-                    type="button"
-                    onClick={() => showToast('Demo Password: Password123!', 'info')}
-                    className="text-[11px] text-[#006666] font-bold hover:underline"
-                  >
-                    Forgot password?
-                  </button>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-[#006666]" />
                   <input
-                    type="password"
+                    type={showLoginPassword ? "text" : "password"}
                     required
                     placeholder="••••••••"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-[#006666] transition-colors"
+                  >
+                    {showLoginPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -371,7 +378,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => handleQuickFill('john_doe')}
+                onClick={() => handleQuickFill('student1')}
                 className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-teal-50 hover:border-teal-400 text-left transition-all flex items-center gap-2"
               >
                 <img
@@ -381,13 +388,13 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Student</p>
-                  <span className="text-[9px] text-slate-500 font-mono">john_doe</span>
+                  <span className="text-[9px] text-slate-500 font-mono">student1</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickFill('prof_smith')}
+                onClick={() => handleQuickFill('faculty1')}
                 className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 text-left transition-all flex items-center gap-2"
               >
                 <img
@@ -397,13 +404,13 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Faculty</p>
-                  <span className="text-[9px] text-slate-500 font-mono">prof_smith</span>
+                  <span className="text-[9px] text-slate-500 font-mono">faculty1</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleQuickFill('admin_user')}
+                onClick={() => handleQuickFill('admin')}
                 className="p-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-400 text-left transition-all flex items-center gap-2"
               >
                 <img
@@ -413,7 +420,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] font-bold leading-none text-[#333333]">Admin</p>
-                  <span className="text-[9px] text-slate-500 font-mono">admin_user</span>
+                  <span className="text-[9px] text-slate-500 font-mono">admin</span>
                 </div>
               </button>
             </div>

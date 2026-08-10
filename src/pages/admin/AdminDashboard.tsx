@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, CartesianGrid } from 'recharts';
 import { reportService } from '../../services/reportService';
+import { healthService, SystemHealthStatus } from '../../services/healthService';
 import { EnrollmentTrendItem, DepartmentDistributionItem } from '../../types/report';
 import { Badge } from '../../components/ui/Badge';
 import { Link } from 'react-router-dom';
@@ -31,16 +32,22 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'analytics' | 'telemetry' | 'audit'>('analytics');
   const [isPinging, setIsPinging] = useState(false);
 
-  const [microservices, setMicroservices] = useState([
-    { name: 'API Gateway', port: ':8080', status: 'HEALTHY', latency: '12ms' },
-    { name: 'Auth Service', port: ':8081', status: 'HEALTHY', latency: '8ms' },
-    { name: 'Student Service', port: ':8082', status: 'HEALTHY', latency: '14ms' },
-    { name: 'Faculty Service', port: ':8083', status: 'HEALTHY', latency: '11ms' },
-    { name: 'Course Service', port: ':8084', status: 'HEALTHY', latency: '9ms' },
-    { name: 'Enrollment Service', port: ':8085', status: 'HEALTHY', latency: '16ms' },
-    { name: 'Grade Service', port: ':8086', status: 'HEALTHY', latency: '10ms' },
-    { name: 'Notification Service', port: ':8087', status: 'HEALTHY', latency: '7ms' },
-  ]);
+  const [systemHealth, setSystemHealth] = useState<SystemHealthStatus>({
+    isOnline: true,
+    onlineCount: 8,
+    totalCount: 8,
+    gatewayLatency: '12ms',
+    services: [
+      { name: 'API Gateway', port: ':8080', status: 'HEALTHY', latency: '12ms' },
+      { name: 'Auth Service', port: ':8081', status: 'HEALTHY', latency: '8ms' },
+      { name: 'Student Service', port: ':8082', status: 'HEALTHY', latency: '14ms' },
+      { name: 'Faculty Service', port: ':8083', status: 'HEALTHY', latency: '11ms' },
+      { name: 'Course Service', port: ':8084', status: 'HEALTHY', latency: '9ms' },
+      { name: 'Enrollment Service', port: ':8085', status: 'HEALTHY', latency: '16ms' },
+      { name: 'Academic Record Service', port: ':8086', status: 'HEALTHY', latency: '10ms' },
+      { name: 'Notification Service', port: ':8087', status: 'HEALTHY', latency: '7ms' },
+    ]
+  });
 
   const auditLogs = [
     { timestamp: '10:42:15', service: 'API Gateway', event: 'JWT Authentication Token Verified', status: 'SUCCESS' },
@@ -50,6 +57,13 @@ export const AdminDashboard: React.FC = () => {
     { timestamp: '10:31:00', service: 'Notification Service', event: 'Broadcast Notification Dispatched (Target: All Students)', status: 'SUCCESS' },
   ];
 
+  const refreshHealth = async () => {
+    setIsPinging(true);
+    const health = await healthService.checkSystemHealth();
+    setSystemHealth(health);
+    setIsPinging(false);
+  };
+
   useEffect(() => {
     const loadReports = async () => {
       const t = await reportService.getEnrollmentStats();
@@ -58,19 +72,11 @@ export const AdminDashboard: React.FC = () => {
       setDistribution(d);
     };
     loadReports();
+    refreshHealth();
   }, []);
 
   const pingAllServices = () => {
-    setIsPinging(true);
-    setTimeout(() => {
-      setMicroservices(prev =>
-        prev.map(svc => ({
-          ...svc,
-          latency: `${Math.floor(Math.random() * 12) + 5}ms`
-        }))
-      );
-      setIsPinging(false);
-    }, 800);
+    refreshHealth();
   };
 
   const COLORS = ['#006666', '#FF7F50', '#339696', '#ff9970', '#0f172a'];
@@ -91,17 +97,26 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Badge variant="danger">ENTERPRISE COMMAND CENTER</Badge>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-emerald-300">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                8/8 Microservices Operational
-              </div>
+              {systemHealth.isOnline ? (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-xs font-semibold text-emerald-300">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  8/8 Microservices Operational ({systemHealth.gatewayLatency})
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 backdrop-blur-md border border-red-400/30 text-xs font-semibold text-red-300">
+                  <span className="relative flex h-2 w-2">
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  Backend Offline (Fallback Mode Active)
+                </div>
+              )}
             </div>
 
             <div className="text-xs font-mono font-medium text-teal-200/90 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/15">
-              Gateway: <span className="font-extrabold text-white">http://localhost:8080</span>
+              Gateway: <span className={`font-extrabold ${systemHealth.isOnline ? 'text-emerald-400' : 'text-red-400'}`}>{systemHealth.isOnline ? 'http://localhost:8080 (UP)' : 'Offline / Unreachable'}</span>
             </div>
           </div>
 
@@ -187,6 +202,25 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {!systemHealth.isOnline && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-between gap-4 text-amber-700 dark:text-amber-300 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">⚠️</span>
+            <div>
+              <h4 className="font-extrabold text-sm">Backend Services Offline</h4>
+              <p className="text-xs opacity-90">The API Gateway (port 8080) is currently unreachable. The application is running in local fallback mode using cached data.</p>
+            </div>
+          </div>
+          <button
+            onClick={pingAllServices}
+            disabled={isPinging}
+            className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 transition-all flex items-center gap-1.5"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isPinging ? 'animate-spin' : ''}`} /> Retry Connection
+          </button>
+        </div>
+      )}
+
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -215,13 +249,13 @@ export const AdminDashboard: React.FC = () => {
         />
         <StatCard
           title="Microservices Uptime"
-          value="99.98%"
-          subtitle="Gateway :8080 Active"
+          value={systemHealth.isOnline ? "99.98%" : "0.00%"}
+          subtitle={systemHealth.isOnline ? "Gateway :8080 Active" : "Gateway Unreachable"}
           icon={Activity}
-          trend="8/8 Online"
-          trendUp={true}
-          color="cyan"
-          progress={99.9}
+          trend={systemHealth.isOnline ? "8/8 Online" : "0/8 Offline"}
+          trendUp={systemHealth.isOnline}
+          color={systemHealth.isOnline ? "cyan" : "coral"}
+          progress={systemHealth.isOnline ? 99.9 : 0}
         />
       </div>
 
@@ -242,7 +276,7 @@ export const AdminDashboard: React.FC = () => {
                   <h3 className="text-lg font-extrabold flex items-center gap-2">
                     <Server className="w-5 h-5 text-teal-600 dark:text-teal-400" /> Microservices Cluster Status
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Live heartbeat across Spring Boot microservices</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Live heartbeat probe across Spring Boot microservices</p>
                 </div>
                 <button
                   onClick={pingAllServices}
@@ -254,21 +288,27 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {microservices.map((svc) => (
+                {systemHealth.services.map((svc) => (
                   <div
                     key={svc.name}
                     className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/80 hover:border-teal-500/40 transition-all shadow-2xs space-y-1"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold truncate">{svc.name}</span>
-                      <span className="relative flex h-2 w-2 shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
+                      {svc.status === 'HEALTHY' ? (
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                      ) : (
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
                       <span>{svc.port}</span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">{svc.latency}</span>
+                      <span className={svc.status === 'HEALTHY' ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-red-500 font-bold'}>{svc.latency}</span>
                     </div>
                   </div>
                 ))}
@@ -408,20 +448,24 @@ export const AdminDashboard: React.FC = () => {
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Detailed metric telemetry for all backend services</p>
               </div>
-              <Badge variant="success">8 / 8 ONLINE</Badge>
+              {systemHealth.isOnline ? (
+                <Badge variant="success">8 / 8 ONLINE ({systemHealth.gatewayLatency})</Badge>
+              ) : (
+                <Badge variant="danger">0 / 8 ONLINE (BACKEND OFFLINE)</Badge>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {microservices.map((svc) => (
+              {systemHealth.services.map((svc) => (
                 <div key={svc.name} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-sm">{svc.name}</span>
-                    <Badge variant="success" size="sm">{svc.status}</Badge>
+                    <Badge variant={svc.status === 'HEALTHY' ? 'success' : 'danger'} size="sm">{svc.status}</Badge>
                   </div>
                   <div className="space-y-1 text-xs font-mono text-slate-500 dark:text-slate-400">
                     <div className="flex justify-between"><span>Port:</span><span className="font-bold text-slate-800 dark:text-slate-200">{svc.port}</span></div>
-                    <div className="flex justify-between"><span>Latency:</span><span className="font-bold text-teal-600 dark:text-teal-400">{svc.latency}</span></div>
-                    <div className="flex justify-between"><span>Memory:</span><span className="font-bold text-slate-800 dark:text-slate-200">128 MB</span></div>
+                    <div className="flex justify-between"><span>Latency:</span><span className={`font-bold ${svc.status === 'HEALTHY' ? 'text-teal-600 dark:text-teal-400' : 'text-red-500'}`}>{svc.latency}</span></div>
+                    <div className="flex justify-between"><span>Status:</span><span className={`font-bold ${svc.status === 'HEALTHY' ? 'text-emerald-600' : 'text-red-500'}`}>{svc.status === 'HEALTHY' ? 'Active' : 'Unreachable'}</span></div>
                   </div>
                 </div>
               ))}

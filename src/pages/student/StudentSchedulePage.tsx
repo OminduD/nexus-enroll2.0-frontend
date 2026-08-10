@@ -17,7 +17,9 @@ export const StudentSchedulePage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadSchedule = async () => {
-    const data = await studentService.getSchedule(user?.id || 1);
+    const p = await studentService.getProfile(user?.id || 1);
+    const actualStudentId = p?.id || user?.id || 1;
+    const data = await studentService.getSchedule(actualStudentId);
     setSchedule(data);
   };
 

@@ -48,11 +48,14 @@ export const CourseCatalogPage: React.FC = () => {
   const handleEnroll = async (section: CourseSection) => {
     setActionLoading(true);
     try {
+      const p = await studentService.getProfile(user?.id || 1);
+      const actualStudentId = p?.id || user?.id || 1;
+
       if (section.enrolledCount >= section.capacity) {
-        await studentService.addToWaitlist(user?.id || 1, section.id);
+        await studentService.addToWaitlist(actualStudentId, section.id);
         showToast(`Waitlist request submitted for ${section.courseCode} (${section.sectionNumber}).`, 'info');
       } else {
-        await studentService.enroll(user?.id || 1, section.id);
+        await studentService.enroll(actualStudentId, section.id);
         showToast(`Successfully enrolled in ${section.courseCode} (${section.sectionNumber})!`, 'success');
       }
       setIsModalOpen(false);

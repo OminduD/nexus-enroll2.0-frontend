@@ -80,10 +80,10 @@ export const UserDirectoryPage: React.FC = () => {
 
   const filteredStudents = students.filter(
     (s) =>
-      s.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.studentIdNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      (s.firstName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (s.lastName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (s.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (s.studentIdNumber?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
 
   return (

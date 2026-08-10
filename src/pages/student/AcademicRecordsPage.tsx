@@ -3,6 +3,7 @@ import { FileSpreadsheet, Award, Download } from 'lucide-react';
 import { recordService } from '../../services/recordService';
 import { CompletedCourseRecord } from '../../types/student';
 import { Badge } from '../../components/ui/Badge';
+import { studentService } from '../../services/studentService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
 
@@ -13,7 +14,9 @@ export const AcademicRecordsPage: React.FC = () => {
 
   useEffect(() => {
     const loadRecords = async () => {
-      const data = await recordService.getCompletedCourses(user?.id || 1);
+      const p = await studentService.getProfile(user?.id || 1);
+      const actualStudentId = p?.id || user?.id || 1;
+      const data = await recordService.getCompletedCourses(actualStudentId);
       setRecords(data);
     };
     loadRecords();
@@ -23,7 +26,8 @@ export const AcademicRecordsPage: React.FC = () => {
     showToast('Official Transcript PDF requested! Download started.', 'success');
   };
 
-  const getGradeVariant = (grade: string) => {
+  const getGradeVariant = (grade?: string) => {
+    if (!grade) return 'danger';
     if (grade.startsWith('A')) return 'success';
     if (grade.startsWith('B')) return 'primary';
     if (grade.startsWith('C')) return 'warning';
