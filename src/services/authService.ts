@@ -1,7 +1,6 @@
 import { apiClient, withMockFallback } from './api';
 import { AuthResponse, Role } from '../types/auth';
-import { getStoredUsers } from './localStore';
-
+import { getStoredUsers, addStoredUser } from './localStore';
 export const authService = {
   login: async (identifier: string, password: string, selectedRole?: Role): Promise<AuthResponse> => {
     try {
@@ -58,15 +57,23 @@ export const authService = {
       if (error?.response?.status === 400 && error?.response?.data?.message) {
         throw error;
       }
-      return withMockFallback(error, {
-        token: `mock-jwt-token-${Date.now()}`,
+      const newUser = {
+        id: Date.now(),
         userId: Date.now(),
         username: data.username,
         email: data.email,
         firstName: data.firstName,
         lastName: data.lastName,
+        studentIdNumber: data.role === 'FACULTY' ? 'FAC' + Date.now() : data.role === 'ADMIN' ? 'ADM' + Date.now() : 'STU' + Date.now(),
         role: data.role || 'STUDENT',
+      };
+      
+      const mockResult = withMockFallback(error, {
+        token: `mock-jwt-token-${Date.now()}`,
+        ...newUser
       });
+      addStoredUser(newUser as any);
+      return mockResult;
     }
   },
 
@@ -74,19 +81,29 @@ export const authService = {
     try {
       const response = await apiClient.post('/api/auth/provision-staff', data);
       return response.data;
-    } catch (error) {
-      return withMockFallback(error, {
+    } catch (error: any) {
+      if (error?.response?.status === 400 && error?.response?.data?.message) {
+        throw error;
+      }
+      const newUser = {
+        id: Date.now(),
+        userId: Date.now(),
+        username: data.username,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        studentIdNumber: data.role === 'FACULTY' ? 'FAC' + Date.now() : 'ADM' + Date.now(),
+        role: data.role,
+        department: data.department,
+      };
+      
+      const mockResult = withMockFallback(error, {
         success: true,
         message: 'Staff account provisioned successfully',
-        data: {
-          id: Date.now(),
-          username: data.username,
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          role: data.role,
-        }
+        data: newUser
       });
+      addStoredUser(newUser as any);
+      return mockResult;
     }
   },
 

@@ -100,8 +100,9 @@ export const UserDirectoryPage: React.FC = () => {
       setStaffEmail('');
       setStaffPassword('Password123!');
       setActiveTab('directory');
-    } catch {
-      showToast('Failed to create account.', 'error');
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || 'Failed to create account.';
+      showToast(msg, 'error');
     } finally {
       setIsSubmitting(false);
     }

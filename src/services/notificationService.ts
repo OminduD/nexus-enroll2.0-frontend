@@ -13,13 +13,12 @@ export const notificationService = {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}`);
       const data = ensureArray<NotificationItem>(response.data);
+      
+      // If backend succeeds, use its data. Merge with local just in case there are offline items.
       const local = getStoredNotifications();
-      if (data.length > 0) {
-        const combined = [...local, ...data];
-        return Array.from(new Map(combined.map(n => [n.id, n])).values())
-                    .sort((a, b) => b.id - a.id);
-      }
-      return local;
+      const combined = [...local, ...data];
+      return Array.from(new Map(combined.map(n => [n.id, n])).values())
+                  .sort((a, b) => b.id - a.id);
     } catch (error) {
       return withMockFallback(error, getStoredNotifications());
     }
@@ -29,7 +28,8 @@ export const notificationService = {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}/unread-count`);
       const notifs = getStoredNotifications();
-      return typeof response.data === 'number' ? response.data : notifs.filter(n => !n.isRead).length;
+      const count = response.data?.data?.count ?? response.data?.count;
+      return typeof count === 'number' ? count : notifs.filter(n => !n.isRead).length;
     } catch (error) {
       const notifs = getStoredNotifications();
       return withMockFallback(error, notifs.filter(n => !n.isRead).length);
@@ -60,10 +60,17 @@ export const notificationService = {
 
   sendNotification: async (payload: Partial<NotificationItem>) => {
     try {
-      const response = await apiClient.post('/api/notifications', payload);
+      const requestPayload = {
+        ...payload,
+        eventType: (payload.notificationType || 'SYSTEM') + '_STUDENT'
+      };
+      const response = await apiClient.post('/api/notifications', requestPayload);
       addStoredNotification(payload);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.response?.status === 400 && error?.response?.data?.message) {
+        throw error;
+      }
       const newNotif = addStoredNotification(payload);
       return withMockFallback(error, newNotif);
     }
