@@ -113,7 +113,10 @@ export const courseService = {
     try {
       const response = await apiClient.get('/api/courses/change-requests');
       const data = ensureArray<ChangeRequest>(response.data);
-      return data.length > 0 ? data : getStoredChangeRequests();
+      const local = getStoredChangeRequests();
+      const combined = [...local, ...data];
+      return Array.from(new Map(combined.map(n => [n.id || Date.now(), n])).values())
+                  .sort((a, b) => (b.id || 0) - (a.id || 0));
     } catch (error) {
       return withMockFallback(error, getStoredChangeRequests());
     }
@@ -121,9 +124,15 @@ export const courseService = {
 
   createChangeRequest: async (req: Partial<ChangeRequest>): Promise<ChangeRequest> => {
     try {
-      const response = await apiClient.post('/api/courses/change-requests', req);
-      addStoredChangeRequest(req);
-      return response.data;
+      const payload = {
+        ...req,
+        justification: req.details || 'No justification provided',
+        requestedBy: typeof req.requestedBy === 'string' ? 1 : (req.requestedBy || 1),
+      };
+      const response = await apiClient.post('/api/courses/change-requests', payload);
+      const newReq = response.data?.data || response.data;
+      addStoredChangeRequest(newReq || req);
+      return newReq;
     } catch (error) {
       return withMockFallback(error, addStoredChangeRequest(req));
     }

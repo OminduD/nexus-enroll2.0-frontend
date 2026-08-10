@@ -85,7 +85,7 @@ export const FacultyDashboard: React.FC = () => {
             <div>
               <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
                 Welcome, <span className="text-coral-300">
-                  {profile?.firstName || user?.firstName || 'Faculty'} {profile?.lastName || user?.lastName || 'Professor'}!
+                  {user?.firstName || profile?.firstName || 'Faculty'} {user?.lastName || profile?.lastName || 'Professor'}!
                 </span>
               </h1>
               <p className="text-xs sm:text-sm text-teal-100/90 max-w-2xl leading-relaxed mt-1">

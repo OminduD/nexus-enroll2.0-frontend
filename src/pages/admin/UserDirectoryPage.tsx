@@ -101,7 +101,10 @@ export const UserDirectoryPage: React.FC = () => {
       setStaffPassword('Password123!');
       setActiveTab('directory');
     } catch (error: any) {
-      const msg = error?.response?.data?.message || 'Failed to create account.';
+      let msg = error?.response?.data?.message || 'Failed to create account.';
+      if (error?.response?.data?.errors && Array.isArray(error.response.data.errors)) {
+        msg = error.response.data.errors.join(' | ');
+      }
       showToast(msg, 'error');
     } finally {
       setIsSubmitting(false);
@@ -198,8 +201,10 @@ export const UserDirectoryPage: React.FC = () => {
                   const email = s.email || s.user?.email || `${firstName.toLowerCase()}@nexus.edu`;
                   const studentId = s.studentIdNumber || s.studentId || s.idNumber || `NEX-2024-${s.id || 1000}`;
                   const major = s.major || s.majorName || s.department || 'Computer Science & Engineering';
-                  const standing = s.academicStanding || s.status || s.standing || 'GOOD_STANDING';
-                  const gpa = s.gpa ?? 3.5;
+                  
+                  const isStaff = studentId.startsWith('FAC') || studentId.startsWith('ADM');
+                  const standing = isStaff ? 'STAFF' : (s.academicStanding || s.status || s.standing || 'GOOD_STANDING');
+                  const gpa = isStaff ? 'N/A' : (s.gpa ?? 3.5);
 
                   return (
                     <tr key={s.id} className="hover:bg-slate-50 transition-colors">
@@ -218,7 +223,7 @@ export const UserDirectoryPage: React.FC = () => {
                       <td className="p-3.5 font-medium">{major}</td>
                       <td className="p-3.5 font-bold text-[#333333]">{gpa}</td>
                       <td className="p-3.5">
-                        <Badge variant={standing === 'SUSPENDED' ? 'danger' : 'success'}>
+                        <Badge variant={isStaff ? 'primary' : standing === 'SUSPENDED' ? 'danger' : 'success'}>
                           {standing}
                         </Badge>
                       </td>
@@ -357,6 +362,7 @@ export const UserDirectoryPage: React.FC = () => {
                     value={staffUsername}
                     onChange={(e) => setStaffUsername(e.target.value)}
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-teal-500 outline-none"
+                    data-gramm="false"
                   />
                 </div>
               </div>
@@ -371,6 +377,7 @@ export const UserDirectoryPage: React.FC = () => {
                     value={staffEmail}
                     onChange={(e) => setStaffEmail(e.target.value)}
                     className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-teal-500 outline-none"
+                    data-gramm="false"
                   />
                 </div>
               </div>

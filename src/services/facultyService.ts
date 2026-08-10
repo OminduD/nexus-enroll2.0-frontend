@@ -24,9 +24,31 @@ export const facultyService = {
 
   getGrades: async (sectionId = 1): Promise<GradeRecord[]> => {
     try {
-      const response = await apiClient.get(`/api/faculty/grades?sectionId=${sectionId}`);
-      const data = ensureArray<GradeRecord>(response.data);
-      return data.length > 0 ? data : getStoredGrades();
+      let allGrades: GradeRecord[] = [];
+      try {
+        const rosterRes = await apiClient.get(`/api/faculty/roster?sectionId=${sectionId}`);
+        const students = rosterRes.data?.data?.students || rosterRes.data?.students || rosterRes.data || [];
+        for (const student of students) {
+          if (student.enrollmentId) {
+            try {
+              const gradesRes = await apiClient.get(`/api/faculty/grades?enrollmentId=${student.enrollmentId}`);
+              const studentGrades = ensureArray<GradeRecord>(gradesRes.data);
+              studentGrades.forEach(g => {
+                g.studentName = student.firstName ? `${student.firstName} ${student.lastName}` : student.studentName;
+                g.courseCode = 'CS-101'; // Fallback for UI if not stored
+              });
+              allGrades.push(...studentGrades);
+            } catch (e) { } // Ignore individual student errors
+          }
+        }
+      } catch (e) {
+         // Ignore roster fetch errors
+      }
+
+      const local = getStoredGrades();
+      const combined = [...local, ...allGrades];
+      return Array.from(new Map(combined.map(n => [n.id || Date.now(), n])).values())
+                  .sort((a, b) => (b.id || 0) - (a.id || 0));
     } catch (error) {
       return withMockFallback(error, getStoredGrades());
     }
@@ -34,9 +56,17 @@ export const facultyService = {
 
   saveDraftGrade: async (gradeData: Partial<GradeRecord>): Promise<GradeRecord> => {
     try {
-      const response = await apiClient.post('/api/faculty/grades/draft', gradeData);
-      addStoredGrade(gradeData);
-      return response.data;
+      // Ensure gradedBy is set
+      const payload = {
+        ...gradeData,
+        gradedBy: gradeData.gradedBy || 'FACULTY'
+      };
+      const response = await apiClient.post('/api/faculty/grades/draft', payload);
+      const newGrade = response.data?.data || response.data;
+      // Preserve frontend-only fields in local storage just in case
+      const localGrade = { ...gradeData, ...newGrade };
+      addStoredGrade(localGrade);
+      return localGrade;
     } catch (error) {
       return withMockFallback(error, addStoredGrade(gradeData));
     }
