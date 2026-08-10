@@ -53,7 +53,8 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
   const handleViewAll = () => {
     setIsOpen(false);
     if (role === 'STUDENT') navigate('/student/notifications');
-    else if (role === 'ADMIN') navigate('/admin/notifications');
+    else if (role === 'FACULTY') navigate('/faculty/notifications');
+    else if (role === 'ADMIN') navigate('/admin/inbox');
   };
 
   return (

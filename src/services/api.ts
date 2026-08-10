@@ -82,5 +82,7 @@ export const ensureArray = <T>(data: any, fallback: T[] = []): T[] => {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.content)) return data.content;
   if (data && Array.isArray(data.data)) return data.data;
+  if (data && data.data && Array.isArray(data.data.content)) return data.data.content;
+  if (data && data.data && Array.isArray(data.data.data)) return data.data.data;
   return fallback;
 };

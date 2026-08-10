@@ -15,15 +15,17 @@ export const authService = {
       }
       return resData && resData.data ? resData.data : resData;
     } catch (error: any) {
-      if (error?.response?.status === 400 || error?.response?.status === 401) {
-        throw error;
-      }
       const storedUsers = getStoredUsers();
       const matchedUser = storedUsers.find(
         (u: any) => 
           u.email.toLowerCase() === identifier.toLowerCase() || 
-          (u.studentIdNumber && u.studentIdNumber.toLowerCase() === identifier.toLowerCase())
+          (u.studentIdNumber && u.studentIdNumber.toLowerCase() === identifier.toLowerCase()) ||
+          (u.username && u.username.toLowerCase() === identifier.toLowerCase())
       );
+      
+      if (!matchedUser && (error?.response?.status === 400 || error?.response?.status === 401)) {
+        throw error;
+      }
       
       const roleAssigned = matchedUser 
         ? (matchedUser.studentIdNumber?.startsWith('FAC') ? 'FACULTY' : matchedUser.studentIdNumber?.startsWith('ADM') ? 'ADMIN' : 'STUDENT')
