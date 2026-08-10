@@ -28,10 +28,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Redirect to their proper role dashboard if attempting forbidden route
-    const roleDefaultPath =
-      user.role === 'ADMIN' ? '/admin/dashboard' : user.role === 'FACULTY' ? '/faculty/dashboard' : '/student/dashboard';
-    return <Navigate to={roleDefaultPath} replace />;
+    return <Navigate to="/403" replace />;
   }
 
   return <Outlet />;

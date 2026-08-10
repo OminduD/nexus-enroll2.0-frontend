@@ -24,9 +24,28 @@ apiClient.interceptors.request.use(
 
 // Response interceptor
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Notify health system backend is responsive
+    window.dispatchEvent(new CustomEvent('nexus:backend-up'));
+    return response;
+  },
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (
+      !error.response ||
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ECONNABORTED' ||
+      [502, 503, 504].includes(error.response?.status)
+    ) {
+      // Backend is unreachable or down
+      window.dispatchEvent(
+        new CustomEvent('nexus:backend-down', {
+          detail: {
+            message: error.message || 'Unable to connect to Nexus Backend Services.',
+            status: error.response?.status || 503,
+          },
+        })
+      );
+    } else if (error.response && error.response.status === 401) {
       // Unauthorized fallback logic if token expired
       console.warn('Unauthorized access detected or session expired.');
     }
