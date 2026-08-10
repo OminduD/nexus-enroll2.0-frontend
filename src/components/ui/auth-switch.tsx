@@ -103,7 +103,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
     try {
       // Automatic role detection from authentication service response
-      const response = await authService.login(loginIdentifier, loginPassword);
+      const response = await authService.login(loginIdentifier.trim(), loginPassword);
       login(response.token, {
         id: response.userId,
         username: response.username,
@@ -125,8 +125,12 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
       navigate(dest);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid username or password. Please try again.');
-      showToast('Authentication failed.', 'error');
+      const apiError =
+        err.response?.data?.errors && err.response.data.errors.length > 0
+          ? err.response.data.errors.join(', ')
+          : err.response?.data?.message || 'Invalid username or password. Please try again.';
+      setError(apiError);
+      showToast(apiError || 'Authentication failed.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -156,31 +160,58 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
     try {
       // Public signup is strictly for Student accounts
-      await authService.register({
-        username: signupUsername || signupEmail.split('@')[0],
-        email: signupEmail,
+      const response = await authService.register({
+        username: (signupUsername || signupEmail.split('@')[0]).trim(),
+        email: signupEmail.trim(),
         password: signupPassword,
-        firstName: signupFirstName,
-        lastName: signupLastName,
+        firstName: signupFirstName.trim(),
+        lastName: signupLastName.trim(),
         role: 'STUDENT',
       });
 
-      showToast('Student account created successfully!', 'success');
-
-      const response = await authService.login(signupUsername || signupEmail, signupPassword);
-      login(response.token, {
-        id: response.userId,
-        username: response.username,
-        email: response.email,
-        firstName: response.firstName,
-        lastName: response.lastName,
-        role: response.role,
-      });
-
-      navigate('/student/dashboard');
+      // Check if registration returned a valid token directly
+      if (response && response.token) {
+        showToast('Student account created successfully!', 'success');
+        login(response.token, {
+          id: response.userId,
+          username: response.username || signupUsername,
+          email: response.email || signupEmail,
+          firstName: response.firstName || signupFirstName,
+          lastName: response.lastName || signupLastName,
+          role: response.role || 'STUDENT',
+        });
+        navigate('/student/dashboard');
+      } else {
+        // Fallback: attempt automatic login with the registered credentials
+        try {
+          const loginRes = await authService.login(signupUsername || signupEmail, signupPassword);
+          showToast('Student account created successfully!', 'success');
+          login(loginRes.token, {
+            id: loginRes.userId,
+            username: loginRes.username || signupUsername,
+            email: loginRes.email || signupEmail,
+            firstName: loginRes.firstName || signupFirstName,
+            lastName: loginRes.lastName || signupLastName,
+            role: loginRes.role || 'STUDENT',
+          });
+          navigate('/student/dashboard');
+        } catch {
+          // If auto-login fails, switch UI to Sign In mode with credentials filled in so user can sign in manually
+          showToast('Account created! Please sign in with your password.', 'info');
+          setLoginIdentifier(signupUsername || signupEmail);
+          setLoginPassword(signupPassword);
+          setIsSignUp(false);
+        }
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
-      showToast('Account creation failed.', 'error');
+      const apiError =
+        typeof err.response?.data === 'string'
+          ? err.response.data
+          : err.response?.data?.errors && err.response.data.errors.length > 0
+          ? err.response.data.errors.join(', ')
+          : err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      setError(apiError);
+      showToast(apiError || 'Account creation failed.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -246,8 +277,23 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             </div>
 
             {error && (
-              <div className="p-2.5 rounded-xl bg-coral-50 border border-coral-200 text-coral-700 text-xs font-semibold text-center">
-                {error}
+              <div className="p-2.5 rounded-xl bg-coral-50 border border-coral-200 text-coral-700 text-xs font-semibold text-center space-y-1">
+                <div>{error}</div>
+                {(error.toLowerCase().includes('email already') ||
+                  error.toLowerCase().includes('username already') ||
+                  error.toLowerCase().includes('already use')) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginIdentifier(signupUsername || signupEmail);
+                      if (onModeChange) onModeChange('signin');
+                      setIsSignUp(false);
+                    }}
+                    className="inline-block mt-1 text-[11px] font-extrabold text-[#006666] underline hover:text-[#004444] cursor-pointer"
+                  >
+                    Account already exists? Click here to Sign In →
+                  </button>
+                )}
               </div>
             )}
 

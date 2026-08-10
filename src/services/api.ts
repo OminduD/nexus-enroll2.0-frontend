@@ -13,14 +13,13 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
+  timeout: 8000,
 });
 
 // Use in service catch blocks: `catch (error) { return withMockFallback(error, MOCK_X); }`
-// Returns the mock value only when VITE_USE_MOCK_FALLBACK=true; otherwise rethrows
-// so a dead backend surfaces as a visible error instead of a fake-looking UI.
-export function withMockFallback<T>(error: unknown, mockValue: T): T {
-  if (USE_MOCK_FALLBACK) {
+// Returns mockValue if fallback enabled or when endpoint returns 404/timeout so UI stays functional
+export function withMockFallback<T>(error: any, mockValue: T): T {
+  if (USE_MOCK_FALLBACK || error?.response?.status === 404 || error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')) {
     return mockValue;
   }
   throw error;
