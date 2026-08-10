@@ -23,6 +23,7 @@ import { authService } from '../../services/authService';
 import { useToast } from '../../components/ui/Toast';
 import { Role } from '../../types/auth';
 import { cn } from '../../lib/utils';
+import { ButtonWithIcon } from './button-with-icon';
 
 export interface AuthSwitchProps {
   initialMode?: 'signin' | 'signup';
@@ -38,8 +39,8 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
   const [isSignUp, setIsSignUp] = useState(initialMode === 'signup');
 
   // Sign In Form State
-  const [loginIdentifier, setLoginIdentifier] = useState('student1');
-  const [loginPassword, setLoginPassword] = useState('Password123');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Sign Up Form State (For Student registration only)
@@ -84,6 +85,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
     const nextState = !isSignUp;
     setIsSignUp(nextState);
     setError('');
+    setLoginPassword('');
+    setSignupPassword('');
+    setSignupConfirmPassword('');
     if (onModeChange) onModeChange(nextState ? 'signup' : 'signin');
   };
 
@@ -213,110 +217,114 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
       </div>
 
       {/* Main Split Sliding Auth Card */}
-      <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 min-h-[620px] overflow-hidden">
+      <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-200 min-h-[660px] md:min-h-[700px] overflow-hidden">
 
         {/* ==================== SIGN UP FORM PANEL (STUDENT ONLY) ==================== */}
         <div
           className={cn(
-            'absolute top-0 left-0 h-full w-full md:w-1/2 p-6 sm:p-10 flex flex-col justify-between transition-all duration-700 ease-in-out',
+            'absolute top-0 left-0 h-full w-full md:w-1/2 p-5 sm:p-7 overflow-y-auto max-h-full flex flex-col justify-between transition-all duration-700 ease-in-out',
             isSignUp
               ? 'translate-x-0 md:translate-x-full opacity-100 z-20'
               : 'opacity-0 z-0 pointer-events-none md:translate-x-0'
           )}
         >
-          <div className="space-y-4">
-            <div className="text-center space-y-1">
-              <h2 className="text-2xl sm:text-3xl font-black text-[#333333]">Student Registration</h2>
-              <p className="text-xs text-slate-500">Create your student academic account</p>
+          <div className="space-y-3">
+            <div className="text-center space-y-0.5">
+              <div className="flex justify-center mb-1">
+                <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-10 h-10 object-contain drop-shadow-md" />
+              </div>
+              <h2 className="text-xl sm:text-2xl font-black text-[#333333]">Student Registration</h2>
+              <p className="text-[11px] text-slate-500">Create your student academic account</p>
             </div>
 
             {/* Public Registration Scope Information Banner */}
-            <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-xs flex items-start gap-2.5">
+            <div className="p-2.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 text-[11px] flex items-start gap-2">
               <Info className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
               <span className="leading-tight">
-                Public registration is for <strong>Student Accounts</strong> only. Faculty and Administrator accounts are provisioned in the Admin Portal.
+                Public registration is for <strong>Student Accounts</strong> only. Faculty & Admin accounts are provisioned by system admins.
               </span>
             </div>
 
             {error && (
-              <div className="p-3 rounded-xl bg-coral-50 border border-coral-200 text-coral-700 text-xs font-semibold text-center">
+              <div className="p-2.5 rounded-xl bg-coral-50 border border-coral-200 text-coral-700 text-xs font-semibold text-center">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSignupSubmit} className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2.5">
+            <form onSubmit={handleSignupSubmit} className="space-y-2 text-xs">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">First Name</label>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">First Name</label>
                   <input
                     type="text"
                     required
                     placeholder="John"
                     value={signupFirstName}
                     onChange={(e) => setSignupFirstName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">Last Name</label>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Last Name</label>
                   <input
                     type="text"
                     required
                     placeholder="Doe"
                     value={signupLastName}
                     onChange={(e) => setSignupLastName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-600 mb-1">Student Username</label>
+                <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Username</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                  <User className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
                   <input
                     type="text"
                     required
                     placeholder="student1"
                     value={signupUsername}
                     onChange={(e) => setSignupUsername(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-600 mb-1">Student Email</label>
+                <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                  <Mail className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
                   <input
                     type="email"
                     required
                     placeholder="john.doe@nexus.edu"
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">Password</label>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                    <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
                     <input
                       type={showSignupPassword ? "text" : "password"}
                       required
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
-                      className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                      className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#006666] transition-colors"
+                      className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
                       title={showSignupPassword ? 'Hide password' : 'Show password'}
                     >
                       {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -325,17 +333,18 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-600 mb-1">Confirm Password</label>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Confirm Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                    <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
                     <input
                       type={showSignupConfirmPassword ? "text" : "password"}
                       required
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={signupConfirmPassword}
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
                       className={cn(
-                        'w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 border focus:ring-4 outline-none text-xs text-[#333333] transition-all',
+                        'w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border focus:ring-4 outline-none text-xs text-[#333333] transition-all',
                         signupConfirmPassword && signupPassword !== signupConfirmPassword
                           ? 'border-coral-500 focus:border-coral-500 focus:ring-coral-500/15'
                           : 'border-slate-200 focus:border-[#006666] focus:ring-[#006666]/15'
@@ -344,7 +353,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
-                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#006666] transition-colors"
+                      className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
                       title={showSignupConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                     >
                       {showSignupConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -354,23 +363,23 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               </div>
 
               {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
-                <p className="text-[11px] font-semibold text-coral-600 flex items-center gap-1 mt-1">
+                <p className="text-[10px] font-semibold text-coral-600 flex items-center gap-1 mt-0.5">
                   <span>⚠️ Passwords do not match</span>
                 </p>
               )}
 
               {/* Password Strength Meter & Requirements Checklist */}
               {signupPassword && (
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2 text-[11px]">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/90 space-y-1 text-[10px]">
                   <div className="flex items-center justify-between">
                     <span className="font-semibold text-slate-500">Security Strength:</span>
-                    <span className={cn('font-extrabold text-xs', getStrengthLabel().text)}>
+                    <span className={cn('font-extrabold text-[11px]', getStrengthLabel().text)}>
                       {getStrengthLabel().label}
                     </span>
                   </div>
 
                   {/* Dynamic Progress Indicator Bar */}
-                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
                     <div
                       className={cn('h-full transition-all duration-300', getStrengthLabel().color)}
                       style={{ width: `${(passedCount / 5) * 100}%` }}
@@ -378,30 +387,30 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                   </div>
 
                   {/* Requirements Checklist */}
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 pt-1 text-[10px]">
+                  <div className="grid grid-cols-2 gap-x-1.5 gap-y-0.5 pt-0.5 text-[9px]">
                     <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.minLength ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.minLength ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
-                      <span>8+ Characters</span>
+                      {passwordCriteria.minLength ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                      <span>8+ Chars</span>
                     </div>
 
                     <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasUpper ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasUpper ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      {passwordCriteria.hasUpper ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
                       <span>Uppercase (A-Z)</span>
                     </div>
 
                     <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasLower ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasLower ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      {passwordCriteria.hasLower ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
                       <span>Lowercase (a-z)</span>
                     </div>
 
                     <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasNumber ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasNumber ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      {passwordCriteria.hasNumber ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
                       <span>Number (0-9)</span>
                     </div>
 
                     <div className={cn('flex items-center gap-1 font-medium col-span-2', passwordCriteria.hasSymbol ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasSymbol ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
-                      <span>Special Symbol (!@#$%^&*...)</span>
+                      {passwordCriteria.hasSymbol ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                      <span>Special Symbol (!@#$...)</span>
                     </div>
                   </div>
                 </div>
@@ -435,6 +444,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
         >
           <div className="space-y-4">
             <div className="text-center space-y-1">
+              <div className="flex justify-center mb-2">
+                <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-12 h-12 object-contain drop-shadow-md" />
+              </div>
               <h2 className="text-2xl sm:text-3xl font-black text-[#333333]">Sign In</h2>
               <p className="text-xs text-slate-500">Enter your credentials to enter your portal</p>
             </div>
@@ -464,13 +476,17 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block font-bold text-slate-600">Password</label>
+                  <span className="text-[10px] text-slate-500 font-mono font-semibold bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                    Default: <strong className="text-teal-700">Password123</strong>
+                  </span>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-[#006666]" />
                   <input
                     type={showLoginPassword ? "text" : "password"}
                     required
-                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    placeholder="Password123"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
@@ -507,8 +523,13 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
           {/* Demo Account Quick-Fill Selector */}
           <div className="pt-4 border-t border-slate-100 space-y-2">
-            <div className="flex items-center gap-1 text-xs font-bold text-[#006666]">
-              <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Test Logins:
+            <div className="flex items-center justify-between text-xs font-bold text-[#006666]">
+              <span className="flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Test Logins:
+              </span>
+              <span className="text-[10px] text-slate-500 font-mono font-medium">
+                (Auto-fills <strong className="text-teal-700 font-bold">Password123</strong>)
+              </span>
             </div>
             <div className="grid grid-cols-3 gap-2">
               <button
@@ -592,11 +613,12 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             >
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-teal-200">
-                  <School className="w-4 h-4 text-[#FF7F50]" /> NexusEnroll Portal
+                  <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-5 h-5 object-contain" /> NexusEnroll Portal
                 </div>
               </div>
 
-              <div className="space-y-4 my-auto">
+              <div className="space-y-4 my-auto flex flex-col items-center">
+                <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-20 h-20 object-contain drop-shadow-xl mb-2" />
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
                   Welcome Back!
                 </h2>
@@ -623,11 +645,12 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             >
               <div className="space-y-2">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-bold text-teal-200">
-                  <School className="w-4 h-4 text-[#FF7F50]" /> NexusEnroll Portal
+                  <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-5 h-5 object-contain" /> NexusEnroll Portal
                 </div>
               </div>
 
-              <div className="space-y-4 my-auto">
+              <div className="space-y-4 my-auto flex flex-col items-center">
+                <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-20 h-20 object-contain drop-shadow-xl mb-2" />
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
                   Student Registration
                 </h2>

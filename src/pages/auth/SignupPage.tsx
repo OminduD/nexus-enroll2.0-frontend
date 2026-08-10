@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Home } from 'lucide-react';
 import { AuthSwitch } from '../../components/ui/auth-switch';
 import { GradientBackground } from '../../components/ui/jade-sky';
+import { BackButton } from '../../components/ui/back-button';
 
 export const SignupPage: React.FC = () => {
   return (
@@ -11,12 +11,8 @@ export const SignupPage: React.FC = () => {
       
       {/* Top Floating Landing Page Button */}
       <div className="fixed top-5 left-5 z-30">
-        <Link
-          to="/"
-          className="group flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-200/90 text-slate-700 hover:text-teal-700 hover:border-teal-500/50 shadow-lg shadow-slate-900/5 font-semibold text-xs tracking-wider uppercase transition-all hover:-translate-x-1"
-        >
-          <ArrowLeft className="w-4 h-4 text-teal-600 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Back to Landing Page</span>
+        <Link to="/">
+          <BackButton label="Back to Landing Page" />
         </Link>
       </div>
 

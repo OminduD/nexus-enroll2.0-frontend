@@ -173,9 +173,7 @@ const LogoHeader = ({ open, role }: { open: boolean; role: string }) => {
         open ? "justify-start px-1" : "justify-center"
       )}
     >
-      <div className="relative flex items-center justify-center w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-700 to-teal-600 text-white font-black text-lg shadow-md flex-shrink-0">
-        N
-      </div>
+      <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-9 h-9 object-contain flex-shrink-0" />
       <motion.div
         animate={{
           display: open ? "flex" : "none",

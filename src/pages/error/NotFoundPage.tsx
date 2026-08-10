@@ -49,8 +49,8 @@ export const NotFoundPage: React.FC = () => {
       {/* Top Bar Navigation */}
       <header className="px-6 py-5 border-b border-slate-800/80 backdrop-blur-md bg-slate-950/70 relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-400 flex items-center justify-center shadow-lg shadow-teal-900/30">
-            <span className="font-extrabold text-white text-xl tracking-wider">N</span>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 via-teal-800 to-slate-900 p-1 flex items-center justify-center shadow-lg shadow-teal-900/30 border border-teal-500/30">
+            <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <span className="font-bold text-lg text-white tracking-tight">Nexus <span className="text-teal-400">Enroll</span></span>
