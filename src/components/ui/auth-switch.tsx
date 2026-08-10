@@ -47,8 +47,8 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
   const [signupEmail, setSignupEmail] = useState('');
   const [signupFirstName, setSignupFirstName] = useState('');
   const [signupLastName, setSignupLastName] = useState('');
-  const [signupPassword, setSignupPassword] = useState('Password123!');
-  const [signupConfirmPassword, setSignupConfirmPassword] = useState('Password123!');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
 
