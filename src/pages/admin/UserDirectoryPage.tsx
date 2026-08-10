@@ -162,7 +162,14 @@ export const UserDirectoryPage: React.FC = () => {
                   <tr key={s.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3.5 font-mono font-bold text-teal-700">{s.studentIdNumber}</td>
                     <td className="p-3.5 font-bold text-[#333333]">
-                      {s.firstName} {s.lastName}
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(s.firstName + ' ' + s.lastName)}&background=006666&color=fff&rounded=true`}
+                          alt={`${s.firstName} ${s.lastName}`}
+                          className="w-6 h-6 rounded-full shrink-0 shadow-sm"
+                        />
+                        <span>{s.firstName} {s.lastName}</span>
+                      </div>
                     </td>
                     <td className="p-3.5 font-medium">{s.email}</td>
                     <td className="p-3.5 font-medium">{s.major}</td>
@@ -371,13 +378,19 @@ export const UserDirectoryPage: React.FC = () => {
         title={`Student Profile: ${selectedStudent?.firstName} ${selectedStudent?.lastName}`}
       >
         <div className="space-y-4 text-xs text-slate-600">
-          <div className="p-4 rounded-xl bg-slate-50 space-y-2 border border-slate-200">
-            <p>
-              Student Number: <span className="font-mono font-bold text-[#333333]">{selectedStudent?.studentIdNumber}</span>
-            </p>
-            <p>
-              Email Address: <span className="font-bold text-[#333333]">{selectedStudent?.email}</span>
-            </p>
+          <div className="flex items-start gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <img 
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent((selectedStudent?.firstName || '') + ' ' + (selectedStudent?.lastName || ''))}&background=006666&color=fff&rounded=true&size=128`}
+              alt="Student Avatar"
+              className="w-16 h-16 rounded-full shadow-md object-cover ring-2 ring-teal-500/20 shrink-0"
+            />
+            <div className="space-y-2 flex-1">
+              <p>
+                Student Number: <span className="font-mono font-bold text-[#333333]">{selectedStudent?.studentIdNumber}</span>
+              </p>
+              <p>
+                Email Address: <span className="font-bold text-[#333333]">{selectedStudent?.email}</span>
+              </p>
             <p>
               Major: <span className="font-bold text-[#333333]">{selectedStudent?.major}</span>
             </p>
@@ -388,6 +401,7 @@ export const UserDirectoryPage: React.FC = () => {
               Cumulative GPA: <span className="font-bold text-teal-700">{selectedStudent?.gpa}</span>
             </p>
           </div>
+        </div>
         </div>
       </Modal>
     </div>

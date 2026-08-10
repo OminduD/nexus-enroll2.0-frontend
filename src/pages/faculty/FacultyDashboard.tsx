@@ -229,6 +229,11 @@ export const FacultyDashboard: React.FC = () => {
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
+                        <img 
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(g.studentName || 'Student')}&background=006666&color=fff&rounded=true`}
+                          alt={g.studentName}
+                          className="w-6 h-6 rounded-full shrink-0 shadow-sm"
+                        />
                         <span className="font-extrabold text-slate-900 dark:text-slate-100">{g.studentName}</span>
                         <Badge
                           variant={g.status === 'APPROVED' ? 'success' : g.status === 'PENDING' ? 'warning' : 'danger'}
@@ -315,6 +320,11 @@ export const FacultyDashboard: React.FC = () => {
                 <div key={apt.id} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(apt.student)}&background=006666&color=fff&rounded=true`}
+                        alt={apt.student}
+                        className="w-6 h-6 rounded-full shrink-0 shadow-sm"
+                      />
                       <span className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{apt.student}</span>
                       <Badge variant={apt.status === 'APPROVED' ? 'success' : apt.status === 'DECLINED' ? 'danger' : 'warning'} size="sm">
                         {apt.status}

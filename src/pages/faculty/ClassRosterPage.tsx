@@ -115,7 +115,7 @@ export const ClassRosterPage: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   <img
-                    src={s.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
+                    src={s.photoUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.studentName)}&background=006666&color=fff&rounded=true`}
                     alt={s.studentName}
                     className="w-10 h-10 rounded-full object-cover border border-slate-300 shrink-0"
                   />

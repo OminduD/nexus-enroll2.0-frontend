@@ -72,7 +72,16 @@ export const GradeApprovalsPage: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {grades.map((g) => (
                 <tr key={g.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-3.5 font-bold text-[#333333]">{g.studentName}</td>
+                  <td className="p-3.5 font-bold text-[#333333]">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(g.studentName || 'Student')}&background=006666&color=fff&rounded=true`}
+                        alt={g.studentName}
+                        className="w-6 h-6 rounded-full shrink-0 shadow-sm"
+                      />
+                      <span>{g.studentName}</span>
+                    </div>
+                  </td>
                   <td className="p-3.5 font-medium">
                     {g.courseCode} • {g.assignmentTitle}
                   </td>
