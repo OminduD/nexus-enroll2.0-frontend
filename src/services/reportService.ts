@@ -1,4 +1,4 @@
-import { apiClient, ensureArray } from './api';
+import { apiClient, ensureArray, withMockFallback } from './api';
 import { EnrollmentTrendItem, DepartmentDistributionItem, CoursePopularityItem, FacultyWorkloadItem } from '../types/report';
 import { MOCK_ENROLLMENT_TRENDS, MOCK_DEPARTMENT_DISTRIBUTION, MOCK_COURSE_POPULARITY, MOCK_FACULTY_WORKLOAD } from './mockData';
 
@@ -7,8 +7,8 @@ export const reportService = {
     try {
       const response = await apiClient.get(`/api/reports/enrollment-stats?semester=${semester}&year=${year}`);
       return ensureArray(response.data, MOCK_ENROLLMENT_TRENDS);
-    } catch {
-      return MOCK_ENROLLMENT_TRENDS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_ENROLLMENT_TRENDS);
     }
   },
 
@@ -20,8 +20,8 @@ export const reportService = {
     try {
       const response = await apiClient.get(`/api/reports/course-popularity?semester=${semester}&year=${year}`);
       return ensureArray(response.data, MOCK_COURSE_POPULARITY);
-    } catch {
-      return MOCK_COURSE_POPULARITY;
+    } catch (error) {
+      return withMockFallback(error, MOCK_COURSE_POPULARITY);
     }
   },
 
@@ -29,8 +29,8 @@ export const reportService = {
     try {
       const response = await apiClient.get(`/api/reports/faculty-workload?semester=${semester}&year=${year}`);
       return ensureArray(response.data, MOCK_FACULTY_WORKLOAD);
-    } catch {
-      return MOCK_FACULTY_WORKLOAD;
+    } catch (error) {
+      return withMockFallback(error, MOCK_FACULTY_WORKLOAD);
     }
   }
 };

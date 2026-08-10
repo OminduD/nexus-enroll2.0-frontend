@@ -13,6 +13,14 @@ RUN npm ci
 # Copy the rest of the application code
 COPY . .
 
+# Vite bakes these in at build time. Default to same-origin ('') so the
+# browser calls the nginx-proxied /api/... path instead of a cross-origin
+# gateway URL, and to disabling the mock-data fallback for real demos.
+ARG VITE_API_BASE_URL=""
+ARG VITE_USE_MOCK_FALLBACK=false
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_USE_MOCK_FALLBACK=$VITE_USE_MOCK_FALLBACK
+
 # Build the application for production
 RUN npm run build
 

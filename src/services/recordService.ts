@@ -1,4 +1,4 @@
-import { apiClient, ensureArray } from './api';
+import { apiClient, ensureArray, withMockFallback } from './api';
 import { CompletedCourseRecord } from '../types/student';
 import { MOCK_COMPLETED_RECORDS } from './mockData';
 
@@ -30,8 +30,8 @@ export const recordService = {
         });
       }
       return ensureArray(data, MOCK_COMPLETED_RECORDS);
-    } catch {
-      return MOCK_COMPLETED_RECORDS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_COMPLETED_RECORDS);
     }
   },
 
@@ -39,8 +39,8 @@ export const recordService = {
     try {
       const response = await apiClient.get(`/api/records?studentId=${studentId}`);
       return ensureArray(response.data, MOCK_COMPLETED_RECORDS);
-    } catch {
-      return MOCK_COMPLETED_RECORDS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_COMPLETED_RECORDS);
     }
   }
 };

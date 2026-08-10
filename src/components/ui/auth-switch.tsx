@@ -36,7 +36,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
   // Sign In Form State
   const [loginIdentifier, setLoginIdentifier] = useState('student1');
-  const [loginPassword, setLoginPassword] = useState('Password123!');
+  const [loginPassword, setLoginPassword] = useState('Password123');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Sign Up Form State (For Student registration only)
@@ -63,7 +63,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
   const handleQuickFill = (presetUsername: string) => {
     setLoginIdentifier(presetUsername);
-    setLoginPassword('Password123!');
+    setLoginPassword('Password123');
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {

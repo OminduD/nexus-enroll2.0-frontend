@@ -1,4 +1,4 @@
-import { apiClient, ensureArray } from './api';
+import { apiClient, ensureArray, withMockFallback } from './api';
 import { Course, CourseSection, Department, DegreeProgram, ChangeRequest } from '../types/course';
 import { MOCK_COURSES, MOCK_SECTIONS, MOCK_DEPARTMENTS, MOCK_PROGRAMS, MOCK_CHANGE_REQUESTS } from './mockData';
 
@@ -8,23 +8,25 @@ export const courseService = {
       const params: Record<string, string | number> = { page, size };
       if (keyword) params.keyword = keyword;
       if (departmentId) params.departmentId = departmentId;
-      
+
       const response = await apiClient.get('/api/courses', { params });
       return ensureArray(response.data, MOCK_COURSES);
-    } catch {
-      let filtered = [...MOCK_COURSES];
-      if (keyword) {
-        const k = keyword.toLowerCase();
-        filtered = filtered.filter(c => 
-          c.title.toLowerCase().includes(k) || 
-          c.courseCode.toLowerCase().includes(k) ||
-          c.description.toLowerCase().includes(k)
-        );
-      }
-      if (departmentId) {
-        filtered = filtered.filter(c => c.departmentId === Number(departmentId));
-      }
-      return filtered;
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        let filtered = [...MOCK_COURSES];
+        if (keyword) {
+          const k = keyword.toLowerCase();
+          filtered = filtered.filter(c =>
+            c.title.toLowerCase().includes(k) ||
+            c.courseCode.toLowerCase().includes(k) ||
+            c.description.toLowerCase().includes(k)
+          );
+        }
+        if (departmentId) {
+          filtered = filtered.filter(c => c.departmentId === Number(departmentId));
+        }
+        return filtered;
+      })());
     }
   },
 
@@ -32,8 +34,8 @@ export const courseService = {
     try {
       const response = await apiClient.get(`/api/courses/${id}`);
       return response.data;
-    } catch {
-      return MOCK_COURSES.find(c => c.id === id) || MOCK_COURSES[0];
+    } catch (error) {
+      return withMockFallback(error, MOCK_COURSES.find(c => c.id === id) || MOCK_COURSES[0]);
     }
   },
 
@@ -41,23 +43,25 @@ export const courseService = {
     try {
       const response = await apiClient.post('/api/courses', courseData);
       return response.data;
-    } catch {
-      const newCourse: Course = {
-        id: Date.now(),
-        courseCode: courseData.courseCode || 'CS-999',
-        courseNumber: courseData.courseNumber || 999,
-        title: courseData.title || 'New Course',
-        description: courseData.description || 'Course description',
-        credits: courseData.credits || 3,
-        capacity: courseData.capacity || 30,
-        enrolledCount: 0,
-        departmentId: courseData.departmentId || 1,
-        departmentName: MOCK_DEPARTMENTS.find(d => d.id === courseData.departmentId)?.name || 'Computer Science',
-        level: courseData.level || 'UNDERGRADUATE',
-        status: courseData.status || 'ACTIVE',
-      };
-      MOCK_COURSES.unshift(newCourse);
-      return newCourse;
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const newCourse: Course = {
+          id: Date.now(),
+          courseCode: courseData.courseCode || 'CS-999',
+          courseNumber: courseData.courseNumber || 999,
+          title: courseData.title || 'New Course',
+          description: courseData.description || 'Course description',
+          credits: courseData.credits || 3,
+          capacity: courseData.capacity || 30,
+          enrolledCount: 0,
+          departmentId: courseData.departmentId || 1,
+          departmentName: MOCK_DEPARTMENTS.find(d => d.id === courseData.departmentId)?.name || 'Computer Science',
+          level: courseData.level || 'UNDERGRADUATE',
+          status: courseData.status || 'ACTIVE',
+        };
+        MOCK_COURSES.unshift(newCourse);
+        return newCourse;
+      })());
     }
   },
 
@@ -65,13 +69,15 @@ export const courseService = {
     try {
       const response = await apiClient.put(`/api/courses/${id}`, courseData);
       return response.data;
-    } catch {
-      const idx = MOCK_COURSES.findIndex(c => c.id === id);
-      if (idx !== -1) {
-        MOCK_COURSES[idx] = { ...MOCK_COURSES[idx], ...courseData };
-        return MOCK_COURSES[idx];
-      }
-      return MOCK_COURSES[0];
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const idx = MOCK_COURSES.findIndex(c => c.id === id);
+        if (idx !== -1) {
+          MOCK_COURSES[idx] = { ...MOCK_COURSES[idx], ...courseData };
+          return MOCK_COURSES[idx];
+        }
+        return MOCK_COURSES[0];
+      })());
     }
   },
 
@@ -79,8 +85,8 @@ export const courseService = {
     try {
       const response = await apiClient.get(`/api/courses/sections?semester=${semester}&year=${year}`);
       return ensureArray(response.data, MOCK_SECTIONS);
-    } catch {
-      return MOCK_SECTIONS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_SECTIONS);
     }
   },
 
@@ -88,8 +94,8 @@ export const courseService = {
     try {
       const response = await apiClient.get('/api/courses/departments');
       return ensureArray(response.data, MOCK_DEPARTMENTS);
-    } catch {
-      return MOCK_DEPARTMENTS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_DEPARTMENTS);
     }
   },
 
@@ -97,8 +103,8 @@ export const courseService = {
     try {
       const response = await apiClient.get('/api/courses/programs');
       return ensureArray(response.data, MOCK_PROGRAMS);
-    } catch {
-      return MOCK_PROGRAMS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_PROGRAMS);
     }
   },
 
@@ -106,8 +112,8 @@ export const courseService = {
     try {
       const response = await apiClient.get('/api/courses/change-requests');
       return ensureArray(response.data, MOCK_CHANGE_REQUESTS);
-    } catch {
-      return MOCK_CHANGE_REQUESTS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_CHANGE_REQUESTS);
     }
   },
 
@@ -115,20 +121,22 @@ export const courseService = {
     try {
       const response = await apiClient.post('/api/courses/change-requests', req);
       return response.data;
-    } catch {
-      const newReq: ChangeRequest = {
-        id: Date.now(),
-        courseId: req.courseId || 1,
-        courseCode: req.courseCode || 'CS-101',
-        requestType: req.requestType || 'CAPACITY_CHANGE',
-        requestedBy: req.requestedBy || 'prof_smith',
-        proposedValue: req.proposedValue || '50',
-        details: req.details || 'Capacity increase justification',
-        status: 'PENDING',
-        createdAt: new Date().toISOString().split('T')[0],
-      };
-      MOCK_CHANGE_REQUESTS.unshift(newReq);
-      return newReq;
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const newReq: ChangeRequest = {
+          id: Date.now(),
+          courseId: req.courseId || 1,
+          courseCode: req.courseCode || 'CS-101',
+          requestType: req.requestType || 'CAPACITY_CHANGE',
+          requestedBy: req.requestedBy || 'prof_smith',
+          proposedValue: req.proposedValue || '50',
+          details: req.details || 'Capacity increase justification',
+          status: 'PENDING',
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        MOCK_CHANGE_REQUESTS.unshift(newReq);
+        return newReq;
+      })());
     }
   },
 
@@ -139,13 +147,15 @@ export const courseService = {
         reviewComment: comment
       });
       return response.data;
-    } catch {
-      const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
-      if (item) {
-        item.status = 'APPROVED';
-        item.reviewComment = comment;
-      }
-      return { success: true };
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
+        if (item) {
+          item.status = 'APPROVED';
+          item.reviewComment = comment;
+        }
+        return { success: true };
+      })());
     }
   },
 
@@ -156,13 +166,15 @@ export const courseService = {
         reviewComment: comment
       });
       return response.data;
-    } catch {
-      const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
-      if (item) {
-        item.status = 'REJECTED';
-        item.reviewComment = comment;
-      }
-      return { success: true };
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
+        if (item) {
+          item.status = 'REJECTED';
+          item.reviewComment = comment;
+        }
+        return { success: true };
+      })());
     }
   }
 };

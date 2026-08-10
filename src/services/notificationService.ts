@@ -1,4 +1,4 @@
-import { apiClient, ensureArray } from './api';
+import { apiClient, ensureArray, withMockFallback } from './api';
 import { NotificationItem } from '../types/notification';
 import { MOCK_NOTIFICATIONS } from './mockData';
 
@@ -7,8 +7,8 @@ export const notificationService = {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}`);
       return ensureArray(response.data, MOCK_NOTIFICATIONS);
-    } catch {
-      return MOCK_NOTIFICATIONS;
+    } catch (error) {
+      return withMockFallback(error, MOCK_NOTIFICATIONS);
     }
   },
 
@@ -16,8 +16,8 @@ export const notificationService = {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}/unread-count`);
       return typeof response.data === 'number' ? response.data : MOCK_NOTIFICATIONS.filter(n => !n.isRead).length;
-    } catch {
-      return MOCK_NOTIFICATIONS.filter(n => !n.isRead).length;
+    } catch (error) {
+      return withMockFallback(error, MOCK_NOTIFICATIONS.filter(n => !n.isRead).length);
     }
   },
 
@@ -25,10 +25,12 @@ export const notificationService = {
     try {
       const response = await apiClient.post(`/api/notifications/${notificationId}/read`);
       return response.data;
-    } catch {
-      const item = MOCK_NOTIFICATIONS.find(n => n.id === notificationId);
-      if (item) item.isRead = true;
-      return { success: true };
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const item = MOCK_NOTIFICATIONS.find(n => n.id === notificationId);
+        if (item) item.isRead = true;
+        return { success: true };
+      })());
     }
   },
 
@@ -36,9 +38,11 @@ export const notificationService = {
     try {
       const response = await apiClient.post(`/api/notifications/user/${userId}/read-all`);
       return response.data;
-    } catch {
-      MOCK_NOTIFICATIONS.forEach(n => { n.isRead = true; });
-      return { success: true };
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        MOCK_NOTIFICATIONS.forEach(n => { n.isRead = true; });
+        return { success: true };
+      })());
     }
   },
 
@@ -46,19 +50,21 @@ export const notificationService = {
     try {
       const response = await apiClient.post('/api/notifications', payload);
       return response.data;
-    } catch {
-      const newNotif: NotificationItem = {
-        id: Date.now(),
-        recipientUserId: payload.recipientUserId || 1,
-        title: payload.title || 'System Announcement',
-        message: payload.message || 'Notification content',
-        notificationType: payload.notificationType || 'SYSTEM',
-        priority: payload.priority || 'MEDIUM',
-        isRead: false,
-        createdAt: 'Just now',
-      };
-      MOCK_NOTIFICATIONS.unshift(newNotif);
-      return newNotif;
+    } catch (error) {
+      return withMockFallback(error, (() => {
+        const newNotif: NotificationItem = {
+          id: Date.now(),
+          recipientUserId: payload.recipientUserId || 1,
+          title: payload.title || 'System Announcement',
+          message: payload.message || 'Notification content',
+          notificationType: payload.notificationType || 'SYSTEM',
+          priority: payload.priority || 'MEDIUM',
+          isRead: false,
+          createdAt: 'Just now',
+        };
+        MOCK_NOTIFICATIONS.unshift(newNotif);
+        return newNotif;
+      })());
     }
   }
 };
