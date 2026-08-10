@@ -6,8 +6,10 @@ import { StudentProfile } from '../../types/student';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const UserDirectoryPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [students, setStudents] = useState<StudentProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
@@ -28,8 +30,15 @@ export const UserDirectoryPage: React.FC = () => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      const sList = await studentService.getAllStudents();
-      setStudents(sList);
+      setIsLoading(true);
+      try {
+        const sList = await studentService.getAllStudents();
+        setStudents(sList);
+      } catch (e) {
+        console.warn('User directory fallback:', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadUsers();
   }, []);
@@ -85,6 +94,10 @@ export const UserDirectoryPage: React.FC = () => {
       (s.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (s.studentIdNumber?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) {
+    return <TableSkeleton rows={8} />;
+  }
 
   return (
     <div className="space-y-6">

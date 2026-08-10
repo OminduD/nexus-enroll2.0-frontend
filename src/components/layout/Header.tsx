@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Search,
   LogOut,
@@ -158,6 +158,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -169,6 +170,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isUserMenuOpen]);
 
   const getRoleVariant = (role?: string) => {
     switch (role) {
@@ -196,15 +209,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       <Navbar className="w-full">
       {/* Desktop Resizable Navigation */}
       <NavBody className="flex items-center justify-between transition-all duration-300">
-        {/* Left section: Sleek Glass Sidebar Toggle & Interactive Breadcrumb */}
+        {/* Left section: Interactive Breadcrumb */}
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={onToggleSidebar}
-            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-teal-700 dark:hover:text-white bg-slate-100/80 dark:bg-slate-800/70 hover:bg-white dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs hover:shadow-md hover:border-teal-500/40 transition-all duration-200 group flex items-center justify-center shrink-0"
-            title="Toggle Navigation Sidebar"
-          >
-            <PanelLeft className="w-4.5 h-4.5 text-slate-600 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 group-hover:scale-110 transition-transform duration-200" />
-          </button>
 
           {/* Breadcrumb & Dynamic Context Bar */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 backdrop-blur-md shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
@@ -264,7 +270,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
           <NotificationPopover userId={user?.id} role={user?.role} />
 
-          <div className="relative pl-2 border-l border-slate-200/80 dark:border-slate-800">
+          <div className="relative pl-2 border-l border-slate-200/80 dark:border-slate-800" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center gap-2 p-1 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800 transition-colors"
@@ -282,9 +288,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </button>
 
             {isUserMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setIsUserMenuOpen(false)} />
-                <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl p-2 shadow-2xl z-40 border border-slate-200/90 dark:border-slate-800 animate-slide-up">
+              <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl p-2 shadow-2xl z-50 border border-slate-200/90 dark:border-slate-800 animate-slide-up">
                   <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1 bg-slate-50/60 dark:bg-slate-800/60 rounded-xl flex items-center gap-3">
                     <img
                       src={avatarUrl}
@@ -324,7 +328,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     <LogOut className="w-4 h-4 text-rose-500" /> Sign Out of Nexus
                   </button>
                 </div>
-              </>
             )}
           </div>
         </div>

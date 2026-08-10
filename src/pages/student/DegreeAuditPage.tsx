@@ -4,22 +4,38 @@ import { studentService } from '../../services/studentService';
 import { DegreeProgress } from '../../types/student';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../context/AuthContext';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 
 export const DegreeAuditPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<DegreeProgress | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     const loadProgress = async () => {
-      const p = await studentService.getProfile(user?.id || 1);
-      const actualStudentId = p?.id || user?.id || 1;
-      const data = await studentService.getDegreeProgress(actualStudentId, 1);
-      setProgress(data);
+      setIsLoading(true);
+      try {
+        const p = await studentService.getProfile(user?.id || 1);
+        const actualStudentId = p?.id || user?.id || 1;
+        const data = await studentService.getDegreeProgress(actualStudentId, 1);
+        setProgress(data);
+      } catch (e) {
+        console.warn('Degree audit fallback:', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadProgress();
   }, [user]);
 
-  if (!progress) return null;
+  if (isLoading || !progress) {
+    return (
+      <div className="space-y-6">
+        <CardSkeleton className="h-44" />
+        <CardSkeleton className="h-64" />
+      </div>
+    );
+  }
 
   const percentage = Math.round((progress.creditsCompleted / progress.totalRequiredCredits) * 100);
 

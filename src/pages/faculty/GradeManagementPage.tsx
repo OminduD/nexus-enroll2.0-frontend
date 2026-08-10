@@ -5,8 +5,10 @@ import { GradeRecord } from '../../types/faculty';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const GradeManagementPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [grades, setGrades] = useState<GradeRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,8 +23,15 @@ export const GradeManagementPage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadGrades = async () => {
-    const list = await facultyService.getGrades(1);
-    setGrades(list);
+    setIsLoading(true);
+    try {
+      const list = await facultyService.getGrades(1);
+      setGrades(list);
+    } catch (e) {
+      console.warn('Grade management fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -71,6 +80,10 @@ export const GradeManagementPage: React.FC = () => {
         return <Badge variant="warning">DRAFT</Badge>;
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">

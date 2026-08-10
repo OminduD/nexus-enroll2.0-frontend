@@ -5,8 +5,10 @@ import { Course, CourseLevel, DegreeProgram } from '../../types/course';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const CourseAdminPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
   const [programs, setPrograms] = useState<DegreeProgram[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,10 +29,17 @@ export const CourseAdminPage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadData = async () => {
-    const cList = await courseService.getCourses();
-    const pList = await courseService.getDegreePrograms();
-    setCourses(cList);
-    setPrograms(pList);
+    setIsLoading(true);
+    try {
+      const cList = await courseService.getCourses();
+      const pList = await courseService.getDegreePrograms();
+      setCourses(cList);
+      setPrograms(pList);
+    } catch (e) {
+      console.warn('Course admin fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -91,6 +100,10 @@ export const CourseAdminPage: React.FC = () => {
       (c.courseCode?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (c.title?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) {
+    return <TableSkeleton rows={8} />;
+  }
 
   return (
     <div className="space-y-6">

@@ -4,16 +4,25 @@ import { notificationService } from '../../services/notificationService';
 import { NotificationItem } from '../../types/notification';
 import { Badge } from '../../components/ui/Badge';
 import { useAuth } from '../../context/AuthContext';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const NotificationsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [typeFilter, setTypeFilter] = useState<string>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
   const { user } = useAuth();
 
   const loadNotifications = async () => {
-    const list = await notificationService.getUserNotifications(user?.id || 1);
-    setNotifications(list);
+    setIsLoading(true);
+    try {
+      const list = await notificationService.getUserNotifications(user?.id || 1);
+      setNotifications(list);
+    } catch (e) {
+      console.warn('Notifications fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -30,6 +39,10 @@ export const NotificationsPage: React.FC = () => {
     if (priorityFilter !== 'ALL' && n.priority !== priorityFilter) return false;
     return true;
   });
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">

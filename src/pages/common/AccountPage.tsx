@@ -42,25 +42,13 @@ export const AccountPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Initial profile hydration from backend
-    const loadProfile = async () => {
-      try {
-        if (user?.id) {
-          const profile = await studentService.getProfile(user.id);
-          if (profile) {
-            setFirstName(profile.firstName || user.firstName || '');
-            setLastName(profile.lastName || user.lastName || '');
-            setEmail(profile.email || user.email || '');
-            if (profile.major) setDepartment(profile.major);
-          }
-        }
-      } catch (err) {
-        console.warn('Using initial user session state:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadProfile();
+    // Populate form with current logged in user's profile details
+    if (user) {
+      setFirstName(user.firstName || '');
+      setLastName(user.lastName || '');
+      setEmail(user.email || '');
+    }
+    setIsLoading(false);
   }, [user]);
 
   const activeAvatarUrl = getUserAvatar(user);

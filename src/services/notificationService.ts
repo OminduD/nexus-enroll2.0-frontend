@@ -24,34 +24,41 @@ export const notificationService = {
   markAsRead: async (notificationId: number) => {
     try {
       const response = await apiClient.post(`/api/notifications/${notificationId}/read`);
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
+      const res = withMockFallback(error, (() => {
         const item = MOCK_NOTIFICATIONS.find(n => n.id === notificationId);
         if (item) item.isRead = true;
         return { success: true };
       })());
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
+      return res;
     }
   },
 
   markAllAsRead: async (userId = 1) => {
     try {
       const response = await apiClient.post(`/api/notifications/user/${userId}/read-all`);
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
+      const res = withMockFallback(error, (() => {
         MOCK_NOTIFICATIONS.forEach(n => { n.isRead = true; });
         return { success: true };
       })());
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
+      return res;
     }
   },
 
   sendNotification: async (payload: Partial<NotificationItem>) => {
     try {
       const response = await apiClient.post('/api/notifications', payload);
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
+      const res = withMockFallback(error, (() => {
         const newNotif: NotificationItem = {
           id: Date.now(),
           recipientUserId: payload.recipientUserId || 1,
@@ -65,6 +72,8 @@ export const notificationService = {
         MOCK_NOTIFICATIONS.unshift(newNotif);
         return newNotif;
       })());
+      window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
+      return res;
     }
   }
 };

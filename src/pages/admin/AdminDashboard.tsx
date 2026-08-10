@@ -24,8 +24,10 @@ import { EnrollmentTrendItem, DepartmentDistributionItem } from '../../types/rep
 import { Badge } from '../../components/ui/Badge';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
 
 export const AdminDashboard: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [trends, setTrends] = useState<EnrollmentTrendItem[]>([]);
   const [distribution, setDistribution] = useState<DepartmentDistributionItem[]>([]);
   const [timeframe, setTimeframe] = useState<'2025' | '2024'>('2025');
@@ -66,14 +68,25 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const loadReports = async () => {
-      const t = await reportService.getEnrollmentStats();
-      const d = await reportService.getDepartmentDistribution();
-      setTrends(t);
-      setDistribution(d);
+      setIsLoading(true);
+      try {
+        const t = await reportService.getEnrollmentStats();
+        const d = await reportService.getDepartmentDistribution();
+        setTrends(t);
+        setDistribution(d);
+        await refreshHealth();
+      } catch (e) {
+        console.warn('Dashboard reports fallback:', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadReports();
-    refreshHealth();
   }, []);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   const pingAllServices = () => {
     refreshHealth();
