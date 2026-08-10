@@ -12,6 +12,19 @@ export const studentService = {
     }
   },
 
+  updateProfile: async (studentId: number, profileData: Partial<StudentProfile>): Promise<StudentProfile> => {
+    try {
+      const response = await apiClient.put(`/api/students/${studentId}`, profileData);
+      return response.data.data || response.data;
+    } catch (error) {
+      return withMockFallback(error, {
+        ...MOCK_STUDENT_PROFILE,
+        ...profileData,
+        id: studentId,
+      });
+    }
+  },
+
   getAllStudents: async (page = 0, size = 10): Promise<StudentProfile[]> => {
     try {
       const response = await apiClient.get(`/api/students?page=${page}&size=${size}`);

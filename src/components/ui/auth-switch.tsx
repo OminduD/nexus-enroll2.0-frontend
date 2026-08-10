@@ -24,6 +24,7 @@ import { useToast } from '../../components/ui/Toast';
 import { Role } from '../../types/auth';
 import { cn } from '../../lib/utils';
 import { ButtonWithIcon } from './button-with-icon';
+import { Skeleton } from './Skeleton';
 
 export interface AuthSwitchProps {
   initialMode?: 'signin' | 'signup';
@@ -297,185 +298,203 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
               </div>
             )}
 
-            <form onSubmit={handleSignupSubmit} className="space-y-2 text-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">First Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="John"
-                    value={signupFirstName}
-                    onChange={(e) => setSignupFirstName(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                  />
+            {isSubmitting ? (
+              <div className="space-y-3.5 py-2 animate-pulse">
+                <div className="p-3 rounded-2xl bg-teal-50/80 border border-teal-200/80 space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-teal-200/80" />
+                  <Skeleton className="h-3 w-1/2 bg-teal-200/60" />
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Last Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Doe"
-                    value={signupLastName}
-                    onChange={(e) => setSignupLastName(e.target.value)}
-                    className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                  />
+                <div className="grid grid-cols-2 gap-2">
+                  <Skeleton className="h-9 w-full rounded-xl" />
+                  <Skeleton className="h-9 w-full rounded-xl" />
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Username</label>
-                <div className="relative">
-                  <User className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="student1"
-                    value={signupUsername}
-                    onChange={(e) => setSignupUsername(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                  />
+                <Skeleton className="h-9 w-full rounded-xl" />
+                <Skeleton className="h-9 w-full rounded-xl" />
+                <div className="grid grid-cols-2 gap-2">
+                  <Skeleton className="h-9 w-full rounded-xl" />
+                  <Skeleton className="h-9 w-full rounded-xl" />
                 </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
-                  <input
-                    type="email"
-                    required
-                    placeholder="john.doe@nexus.edu"
-                    value={signupEmail}
-                    onChange={(e) => setSignupEmail(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
-                    <input
-                      type={showSignupPassword ? "text" : "password"}
-                      required
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSignupPassword(!showSignupPassword)}
-                      className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
-                      title={showSignupPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Confirm Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
-                    <input
-                      type={showSignupConfirmPassword ? "text" : "password"}
-                      required
-                      autoComplete="new-password"
-                      placeholder="••••••••"
-                      value={signupConfirmPassword}
-                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                      className={cn(
-                        'w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border focus:ring-4 outline-none text-xs text-[#333333] transition-all',
-                        signupConfirmPassword && signupPassword !== signupConfirmPassword
-                          ? 'border-coral-500 focus:border-coral-500 focus:ring-coral-500/15'
-                          : 'border-slate-200 focus:border-[#006666] focus:ring-[#006666]/15'
-                      )}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
-                      className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
-                      title={showSignupConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                    >
-                      {showSignupConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
-                <p className="text-[10px] font-semibold text-coral-600 flex items-center gap-1 mt-0.5">
-                  <span>⚠️ Passwords do not match</span>
-                </p>
-              )}
-
-              {/* Password Strength Meter & Requirements Checklist */}
-              {signupPassword && (
-                <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/90 space-y-1 text-[10px]">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-slate-500">Security Strength:</span>
-                    <span className={cn('font-extrabold text-[11px]', getStrengthLabel().text)}>
-                      {getStrengthLabel().label}
-                    </span>
-                  </div>
-
-                  {/* Dynamic Progress Indicator Bar */}
-                  <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
-                    <div
-                      className={cn('h-full transition-all duration-300', getStrengthLabel().color)}
-                      style={{ width: `${(passedCount / 5) * 100}%` }}
-                    />
-                  </div>
-
-                  {/* Requirements Checklist */}
-                  <div className="grid grid-cols-2 gap-x-1.5 gap-y-0.5 pt-0.5 text-[9px]">
-                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.minLength ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.minLength ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
-                      <span>8+ Chars</span>
-                    </div>
-
-                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasUpper ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasUpper ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
-                      <span>Uppercase (A-Z)</span>
-                    </div>
-
-                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasLower ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasLower ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
-                      <span>Lowercase (a-z)</span>
-                    </div>
-
-                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasNumber ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasNumber ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
-                      <span>Number (0-9)</span>
-                    </div>
-
-                    <div className={cn('flex items-center gap-1 font-medium col-span-2', passwordCriteria.hasSymbol ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
-                      {passwordCriteria.hasSymbol ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
-                      <span>Special Symbol (!@#$...)</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl bg-[#006666] hover:bg-[#005555] text-white font-extrabold text-xs shadow-md transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
-              >
-                {isSubmitting ? (
+                <Skeleton className="h-10 w-full rounded-xl bg-teal-800/20" />
+                <div className="p-3 rounded-xl bg-[#006666] text-white text-center text-xs font-extrabold flex items-center justify-center gap-2 shadow-md">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" /> Create Student Account
-                  </>
+                  Creating Student Account & Generating Profile...
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSignupSubmit} className="space-y-2 text-xs">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-600 mb-1 text-[11px]">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="John"
+                      value={signupFirstName}
+                      onChange={(e) => setSignupFirstName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-slate-600 mb-1 text-[11px]">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Doe"
+                      value={signupLastName}
+                      onChange={(e) => setSignupLastName(e.target.value)}
+                      className="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Username</label>
+                  <div className="relative">
+                    <User className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="student1"
+                      value={signupUsername}
+                      onChange={(e) => setSignupUsername(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-600 mb-1 text-[11px]">Student Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="john.doe@nexus.edu"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-600 mb-1 text-[11px]">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
+                      <input
+                        type={showSignupPassword ? "text" : "password"}
+                        required
+                        autoComplete="new-password"
+                        placeholder="••••••••"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        className="w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupPassword(!showSignupPassword)}
+                        className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
+                        title={showSignupPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-slate-600 mb-1 text-[11px]">Confirm Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-2.5 top-2 w-4 h-4 text-[#006666]" />
+                      <input
+                        type={showSignupConfirmPassword ? "text" : "password"}
+                        required
+                        autoComplete="new-password"
+                        placeholder="••••••••"
+                        value={signupConfirmPassword}
+                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                        className={cn(
+                          'w-full pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border focus:ring-4 outline-none text-xs text-[#333333] transition-all',
+                          signupConfirmPassword && signupPassword !== signupConfirmPassword
+                            ? 'border-coral-500 focus:border-coral-500 focus:ring-coral-500/15'
+                            : 'border-slate-200 focus:border-[#006666] focus:ring-[#006666]/15'
+                        )}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
+                        className="absolute right-2 top-2 text-slate-400 hover:text-[#006666] transition-colors"
+                        title={showSignupConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                      >
+                        {showSignupConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
+                  <p className="text-[10px] font-semibold text-coral-600 flex items-center gap-1 mt-0.5">
+                    <span>⚠️ Passwords do not match</span>
+                  </p>
                 )}
-              </button>
-            </form>
+
+                {/* Password Strength Meter & Requirements Checklist */}
+                {signupPassword && (
+                  <div className="p-2 rounded-xl bg-slate-50 border border-slate-200/90 space-y-1 text-[10px]">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-500">Security Strength:</span>
+                      <span className={cn('font-extrabold text-[11px]', getStrengthLabel().text)}>
+                        {getStrengthLabel().label}
+                      </span>
+                    </div>
+
+                    {/* Dynamic Progress Indicator Bar */}
+                    <div className="w-full bg-slate-200 h-1 rounded-full overflow-hidden">
+                      <div
+                        className={cn('h-full transition-all duration-300', getStrengthLabel().color)}
+                        style={{ width: `${(passedCount / 5) * 100}%` }}
+                      />
+                    </div>
+
+                    {/* Requirements Checklist */}
+                    <div className="grid grid-cols-2 gap-x-1.5 gap-y-0.5 pt-0.5 text-[9px]">
+                      <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.minLength ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                        {passwordCriteria.minLength ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                        <span>8+ Chars</span>
+                      </div>
+
+                      <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasUpper ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                        {passwordCriteria.hasUpper ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                        <span>Uppercase (A-Z)</span>
+                      </div>
+
+                      <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasLower ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                        {passwordCriteria.hasLower ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                        <span>Lowercase (a-z)</span>
+                      </div>
+
+                      <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasNumber ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                        {passwordCriteria.hasNumber ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                        <span>Number (0-9)</span>
+                      </div>
+
+                      <div className={cn('flex items-center gap-1 font-medium col-span-2', passwordCriteria.hasSymbol ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                        {passwordCriteria.hasSymbol ? <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" /> : <X className="w-2.5 h-2.5 text-slate-300 shrink-0" />}
+                        <span>Special Symbol (!@#$...)</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 rounded-xl bg-[#006666] hover:bg-[#005555] text-white font-extrabold text-xs shadow-md transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
+                >
+                  <UserPlus className="w-4 h-4" /> Create Student Account
+                </button>
+              </form>
+            )}
           </div>
         </div>
 

@@ -50,9 +50,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (newToken: string, newUser: User) => {
+    let overrides: Partial<User> = {};
+    try {
+      const savedById = newUser.id ? localStorage.getItem(`nexus_user_profile_${newUser.id}`) : null;
+      const savedByEmail = newUser.email ? localStorage.getItem(`nexus_user_profile_${newUser.email}`) : null;
+      const savedByUsername = newUser.username ? localStorage.getItem(`nexus_user_profile_${newUser.username}`) : null;
+
+      const saved = savedById || savedByEmail || savedByUsername;
+      if (saved) {
+        overrides = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn('Failed to parse saved user profile overrides:', e);
+    }
+
     const userWithAvatar = {
       ...newUser,
-      avatarUrl: newUser.avatarUrl || getDefaultAvatarForRole(newUser.role),
+      ...overrides,
+      avatarUrl: overrides.avatarUrl || newUser.avatarUrl || getDefaultAvatarForRole(newUser.role),
     };
     setToken(newToken);
     setUser(userWithAvatar);
@@ -65,6 +80,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!prev) return null;
       const updated = { ...prev, ...updatedFields };
       localStorage.setItem('nexus_user', JSON.stringify(updated));
+
+      try {
+        const existingOverridesStr = prev.id ? localStorage.getItem(`nexus_user_profile_${prev.id}`) : null;
+        const existingOverrides = existingOverridesStr ? JSON.parse(existingOverridesStr) : {};
+        const mergedOverrides = { ...existingOverrides, ...updatedFields };
+        const overridesStr = JSON.stringify(mergedOverrides);
+
+        if (prev.id) localStorage.setItem(`nexus_user_profile_${prev.id}`, overridesStr);
+        if (prev.email) localStorage.setItem(`nexus_user_profile_${prev.email}`, overridesStr);
+        if (prev.username) localStorage.setItem(`nexus_user_profile_${prev.username}`, overridesStr);
+        if (updated.id) localStorage.setItem(`nexus_user_profile_${updated.id}`, overridesStr);
+        if (updated.email) localStorage.setItem(`nexus_user_profile_${updated.email}`, overridesStr);
+        if (updated.username) localStorage.setItem(`nexus_user_profile_${updated.username}`, overridesStr);
+      } catch (e) {
+        console.warn('Failed to save user profile overrides:', e);
+      }
+
       return updated;
     });
   };

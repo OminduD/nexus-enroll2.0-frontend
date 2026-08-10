@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StatCard } from '../../components/ui/StatCard';
+import { DashboardSkeleton } from '../../components/ui/Skeleton';
 import {
   BookOpen,
   Calendar,
@@ -30,6 +31,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [schedule, setSchedule] = useState<StudentEnrollment[]>([]);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -47,6 +49,7 @@ export const StudentDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const p = await studentService.getProfile(user?.id || 1).catch(() => null);
         const actualStudentId = p?.id || user?.id || 1;
@@ -76,10 +79,16 @@ export const StudentDashboard: React.FC = () => {
         setUnreadCount(typeof uc === 'number' ? uc : 0);
       } catch (err) {
         console.warn('Dashboard initialized with fallback data:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
   }, [user]);
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   const scheduleList = Array.isArray(schedule) ? schedule : [];
   const totalCredits = scheduleList.reduce((acc, curr) => acc + (curr?.credits || 0), 0);
