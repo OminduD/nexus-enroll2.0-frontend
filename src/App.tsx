@@ -33,6 +33,12 @@ import { UserDirectoryPage } from './pages/admin/UserDirectoryPage';
 import { SystemReportsPage } from './pages/admin/SystemReportsPage';
 import { NotificationBroadcastPage } from './pages/admin/NotificationBroadcastPage';
 
+// Public Landing Page
+import LandingPage from './pages/LandingPage';
+
+// Common Pages
+import { AccountPage } from './pages/common/AccountPage';
+
 const RootRedirect: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
@@ -48,7 +54,9 @@ export const App: React.FC = () => {
         <ToastProvider>
           <BrowserRouter>
             <Routes>
-              {/* Public Auth Routes */}
+              {/* Public Landing & Auth Routes */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
 
@@ -62,6 +70,7 @@ export const App: React.FC = () => {
                   <Route path="/student/progress" element={<DegreeAuditPage />} />
                   <Route path="/student/records" element={<AcademicRecordsPage />} />
                   <Route path="/student/notifications" element={<NotificationsPage />} />
+                  <Route path="/student/account" element={<AccountPage />} />
                 </Route>
               </Route>
 
@@ -73,6 +82,7 @@ export const App: React.FC = () => {
                   <Route path="/faculty/roster" element={<ClassRosterPage />} />
                   <Route path="/faculty/grades" element={<GradeManagementPage />} />
                   <Route path="/faculty/change-requests" element={<ChangeRequestsPage />} />
+                  <Route path="/faculty/account" element={<AccountPage />} />
                 </Route>
               </Route>
 
@@ -87,6 +97,7 @@ export const App: React.FC = () => {
                   <Route path="/admin/users" element={<UserDirectoryPage />} />
                   <Route path="/admin/reports" element={<SystemReportsPage />} />
                   <Route path="/admin/notifications" element={<NotificationBroadcastPage />} />
+                  <Route path="/admin/account" element={<AccountPage />} />
                 </Route>
               </Route>
 

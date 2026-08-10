@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Role } from '../types/auth';
+import { getDefaultAvatarForRole } from '../lib/avatars';
 
 interface AuthContextType {
   user: User | null;
@@ -8,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUser: (updatedFields: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,14 +26,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        if (!parsed.avatarUrl) {
+          parsed.avatarUrl = getDefaultAvatarForRole(parsed.role);
+        }
+        setUser(parsed);
       } catch (e) {
         console.error('Failed to parse stored user:', e);
         localStorage.removeItem('nexus_token');
         localStorage.removeItem('nexus_user');
       }
     } else {
-      // Default initial mock login session for smooth experience if none stored
       const defaultUser: User = {
         id: 1,
         username: 'john_doe',
@@ -39,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firstName: 'John',
         lastName: 'Doe',
         role: 'STUDENT',
+        avatarUrl: getDefaultAvatarForRole('STUDENT'),
       };
       const defaultToken = 'mock-jwt-token-initial';
       setUser(defaultUser);
@@ -50,10 +56,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (newToken: string, newUser: User) => {
+    const userWithAvatar = {
+      ...newUser,
+      avatarUrl: newUser.avatarUrl || getDefaultAvatarForRole(newUser.role),
+    };
     setToken(newToken);
-    setUser(newUser);
+    setUser(userWithAvatar);
     localStorage.setItem('nexus_token', newToken);
-    localStorage.setItem('nexus_user', JSON.stringify(newUser));
+    localStorage.setItem('nexus_user', JSON.stringify(userWithAvatar));
+  };
+
+  const updateUser = (updatedFields: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updatedFields };
+      localStorage.setItem('nexus_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const logout = () => {
@@ -64,7 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token && !!user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token && !!user, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

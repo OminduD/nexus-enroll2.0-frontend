@@ -415,15 +415,68 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
             </form>
           </div>
 
-          {/* Quick Demo Credentials Footer */}
-          <div className="pt-4 border-t border-slate-100">
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 space-y-0.5">
-              <div className="flex items-center gap-1 font-semibold text-[#006666]">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Demo Credentials:
-              </div>
-              <p>Student: <span className="font-mono text-[#333333]">john_doe</span> | Password123!</p>
-              <p>Faculty: <span className="font-mono text-[#333333]">prof_smith</span> | Password123!</p>
-              <p>Admin: <span className="font-mono text-[#333333]">admin_user</span> | Password123!</p>
+          {/* Quick Demo Accounts Selection */}
+          <div className="pt-4 border-t border-slate-100 space-y-2">
+            <div className="flex items-center gap-1 text-xs font-bold text-[#006666]">
+              <Sparkles className="w-3.5 h-3.5 text-[#FF7F50]" /> Quick Select Account:
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleRoleSelect('STUDENT')}
+                className={cn(
+                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
+                  role === 'STUDENT' ? "bg-teal-50 border-teal-500 ring-2 ring-teal-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                )}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
+                  alt="Student Avatar"
+                  className="w-7 h-7 rounded-lg object-cover ring-1 ring-teal-500/40"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold leading-none text-[#333333]">Student</p>
+                  <span className="text-[9px] text-slate-400 font-mono">John</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRoleSelect('FACULTY')}
+                className={cn(
+                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
+                  role === 'FACULTY' ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                )}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=150"
+                  alt="Faculty Avatar"
+                  className="w-7 h-7 rounded-lg object-cover ring-1 ring-amber-500/40"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold leading-none text-[#333333]">Faculty</p>
+                  <span className="text-[9px] text-slate-400 font-mono">Prof. Smith</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleRoleSelect('ADMIN')}
+                className={cn(
+                  "p-2 rounded-xl border text-left transition-all flex items-center gap-2",
+                  role === 'ADMIN' ? "bg-rose-50 border-rose-500 ring-2 ring-rose-500/20" : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                )}
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150"
+                  alt="Admin Avatar"
+                  className="w-7 h-7 rounded-lg object-cover ring-1 ring-rose-500/40"
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold leading-none text-[#333333]">Admin</p>
+                  <span className="text-[9px] text-slate-400 font-mono">Dr. Vance</span>
+                </div>
+              </button>
             </div>
           </div>
         </div>
@@ -466,7 +519,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
               <div className="space-y-4 my-auto">
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-                  Welcome Back! 🎓
+                  Welcome Back!
                 </h2>
                 <p className="text-xs sm:text-sm text-teal-100 max-w-xs leading-relaxed mx-auto">
                   To keep connected with your courses, timetable, and faculty requests, please log in with your credentials.
@@ -497,7 +550,7 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
 
               <div className="space-y-4 my-auto">
                 <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-                  Hello, Friend! 👋
+                  Hello, Friend!
                 </h2>
                 <p className="text-xs sm:text-sm text-teal-100 max-w-xs leading-relaxed mx-auto">
                   Register your account details and start managing your course enrollments and academic standing with NexusEnroll.

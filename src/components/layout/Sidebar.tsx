@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   BookOpen,
@@ -12,143 +12,184 @@ import {
   FileCode,
   BarChart3,
   Send,
-  X,
-  Sparkles
+  Sparkles,
+  LogOut,
+  User as UserIcon
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
-import { Badge } from '../ui/Badge';
+import { Sidebar as AcetSidebar, SidebarBody, SidebarLink, useSidebar } from '../ui/sidebar';
+import { cn } from '@/lib/utils';
+import { getUserAvatar } from '../../lib/avatars';
 
-interface SidebarProps {
-  isOpen: boolean;
+interface AppSidebarProps {
+  isOpen?: boolean;
+  setIsOpen?: (open: boolean) => void;
   onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
-  const role = user?.role || 'STUDENT';
-
-  const studentNav = [
-    { title: 'Overview', path: '/student/dashboard', icon: LayoutDashboard },
-    { title: 'Course Catalog', path: '/student/courses', icon: BookOpen },
-    { title: 'Schedule & Timetable', path: '/student/schedule', icon: Calendar },
-    { title: 'Degree Progress', path: '/student/progress', icon: GraduationCap },
-    { title: 'Academic Records', path: '/student/records', icon: FileSpreadsheet },
-    { title: 'Notifications', path: '/student/notifications', icon: Bell },
-  ];
-
-  const facultyNav = [
-    { title: 'Overview', path: '/faculty/dashboard', icon: LayoutDashboard },
-    { title: 'My Courses & Rosters', path: '/faculty/roster', icon: Users },
-    { title: 'Grade Management', path: '/faculty/grades', icon: CheckSquare },
-    { title: 'Course Change Requests', path: '/faculty/change-requests', icon: FileCode },
-  ];
-
-  const adminNav = [
-    { title: 'Analytics Overview', path: '/admin/dashboard', icon: LayoutDashboard },
-    { title: 'Course Administration', path: '/admin/courses', icon: BookOpen },
-    { title: 'Grade Approvals Queue', path: '/admin/grade-approvals', icon: CheckSquare },
-    { title: 'Change Requests Inbox', path: '/admin/change-requests', icon: FileCode },
-    { title: 'User Directory', path: '/admin/users', icon: Users },
-    { title: 'System Reports', path: '/admin/reports', icon: BarChart3 },
-    { title: 'Broadcast Notification', path: '/admin/notifications', icon: Send },
-  ];
-
-  const navItems = role === 'ADMIN' ? adminNav : role === 'FACULTY' ? facultyNav : studentNav;
+export const Sidebar: React.FC<AppSidebarProps> = ({ isOpen, setIsOpen, onClose }) => {
+  const handleSetOpen = setIsOpen
+    ? (val: boolean | ((prev: boolean) => boolean)) => {
+        setIsOpen(typeof val === 'function' ? val(!!isOpen) : val);
+      }
+    : undefined;
 
   return (
-    <>
-      {/* Mobile Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-
-      <aside
-        className={`fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-white border-r border-slate-200 shadow-sm flex flex-col transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
-        {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-slate-100 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-700 to-teal-600 text-white font-black text-xl shadow-md glow-box-teal">
-              N
-            </div>
-            <div>
-              <h2 className="font-extrabold text-base tracking-tight text-[#333333] leading-tight">
-                Nexus<span className="text-teal-700">Enroll</span>
-              </h2>
-              <p className="text-[9px] font-bold text-teal-700 uppercase tracking-widest flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-coral-500" /> Enterprise v2.0
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-[#333333] lg:hidden"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* User Role Banner */}
-        <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-              Active Portal
-            </span>
-            <Badge
-              variant={role === 'ADMIN' ? 'danger' : role === 'FACULTY' ? 'warning' : 'primary'}
-            >
-              {role} MODE
-            </Badge>
-          </div>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="flex-1 overflow-y-auto p-4 space-y-1.5">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-3 mb-2">
-            Main Navigation
-          </p>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                    isActive
-                      ? 'bg-teal-700 text-white shadow-md font-bold'
-                      : 'text-[#333333] hover:bg-slate-100 hover:text-teal-800'
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white shadow-sm" />
-                    )}
-                    <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-teal-700'}`} />
-                    <span>{item.title}</span>
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-100 text-[11px] text-slate-500 text-center bg-slate-50/50">
-          <p className="font-bold text-[#333333]">NexusEnroll System</p>
-          <p className="text-[10px] text-slate-400 font-mono">Microservices Architecture</p>
-        </div>
-      </aside>
-    </>
+    <AcetSidebar open={isOpen} setOpen={handleSetOpen}>
+      <SidebarContent onClose={onClose} />
+    </AcetSidebar>
   );
 };
 
+const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
+  const { user, logout } = useAuth();
+  const location = useLocation();
+  const { open } = useSidebar();
+  const role = user?.role || 'STUDENT';
+
+  const accountHref = role === 'ADMIN' ? '/admin/account' : role === 'FACULTY' ? '/faculty/account' : '/student/account';
+
+  const studentNav = [
+    { label: 'Overview', href: '/student/dashboard', icon: LayoutDashboard },
+    { label: 'Course Catalog', href: '/student/courses', icon: BookOpen },
+    { label: 'Schedule & Timetable', href: '/student/schedule', icon: Calendar },
+    { label: 'Degree Progress', href: '/student/progress', icon: GraduationCap },
+    { label: 'Academic Records', href: '/student/records', icon: FileSpreadsheet },
+    { label: 'Notifications', href: '/student/notifications', icon: Bell },
+    { label: 'My Account', href: '/student/account', icon: UserIcon },
+  ];
+
+  const facultyNav = [
+    { label: 'Overview', href: '/faculty/dashboard', icon: LayoutDashboard },
+    { label: 'My Courses & Rosters', href: '/faculty/roster', icon: Users },
+    { label: 'Grade Management', href: '/faculty/grades', icon: CheckSquare },
+    { label: 'Change Requests', href: '/faculty/change-requests', icon: FileCode },
+    { label: 'My Account', href: '/faculty/account', icon: UserIcon },
+  ];
+
+  const adminNav = [
+    { label: 'Analytics Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Course Administration', href: '/admin/courses', icon: BookOpen },
+    { label: 'Grade Approvals', href: '/admin/grade-approvals', icon: CheckSquare },
+    { label: 'Change Requests', href: '/admin/change-requests', icon: FileCode },
+    { label: 'User Directory', href: '/admin/users', icon: Users },
+    { label: 'System Reports', href: '/admin/reports', icon: BarChart3 },
+    { label: 'Broadcast Notification', href: '/admin/notifications', icon: Send },
+    { label: 'My Account', href: '/admin/account', icon: UserIcon },
+  ];
+
+  const navItems = role === 'ADMIN' ? adminNav : role === 'FACULTY' ? facultyNav : studentNav;
+  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username : 'User Profile';
+  const avatarUrl = getUserAvatar(user);
+
+  return (
+    <SidebarBody className="justify-between gap-6 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-sm h-screen">
+      <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <LogoHeader open={open} role={role} />
+        
+        <div className="mt-6 flex flex-col gap-1.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return (
+              <SidebarLink
+                key={item.href}
+                onClick={onClose}
+                link={{
+                  label: item.label,
+                  href: item.href,
+                  icon: (
+                    <Icon
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0 transition-colors",
+                        isActive ? "text-teal-700 dark:text-teal-400 font-bold" : "text-slate-500 group-hover/sidebar:text-teal-700"
+                      )}
+                    />
+                  ),
+                }}
+                className={cn(
+                  "py-2.5 transition-all duration-200",
+                  isActive
+                    ? "bg-teal-50 dark:bg-teal-950/50 text-teal-800 dark:text-teal-200 font-bold border border-teal-200/80 dark:border-teal-800/60 shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                )}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Footer User Info & Sign Out */}
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-1.5">
+        <SidebarLink
+          onClick={onClose}
+          link={{
+            label: userName,
+            href: accountHref,
+            icon: (
+              <img
+                src={avatarUrl}
+                className="h-7 w-7 flex-shrink-0 rounded-full object-cover ring-2 ring-teal-500/40"
+                alt="User Avatar"
+              />
+            ),
+          }}
+          className="hover:bg-slate-100 dark:hover:bg-slate-800/60"
+        />
+        <button
+          onClick={() => {
+            if (onClose) onClose();
+            logout();
+          }}
+          className={cn(
+            "flex items-center gap-3 py-2 px-2.5 text-xs text-slate-500 hover:text-rose-600 transition-colors rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 w-full text-left",
+            open ? "justify-start" : "justify-center"
+          )}
+          title="Sign Out"
+        >
+          <LogOut className="h-5 w-5 text-slate-400 hover:text-rose-600 flex-shrink-0" />
+          <motion.span
+            animate={{
+              display: open ? "inline-block" : "none",
+              opacity: open ? 1 : 0,
+            }}
+            className="text-slate-600 dark:text-slate-300 hover:text-rose-600 font-medium whitespace-pre"
+          >
+            Sign Out
+          </motion.span>
+        </button>
+      </div>
+    </SidebarBody>
+  );
+};
+
+const LogoHeader = ({ open, role }: { open: boolean; role: string }) => {
+  return (
+    <Link
+      to="#"
+      className={cn(
+        "flex items-center gap-3 py-2 relative z-20 overflow-hidden transition-all duration-200",
+        open ? "justify-start px-1" : "justify-center"
+      )}
+    >
+      <div className="relative flex items-center justify-center w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-700 to-teal-600 text-white font-black text-lg shadow-md flex-shrink-0">
+        N
+      </div>
+      <motion.div
+        animate={{
+          display: open ? "flex" : "none",
+          opacity: open ? 1 : 0,
+        }}
+        className="flex flex-col whitespace-pre min-w-0"
+      >
+        <h2 className="font-extrabold text-sm tracking-tight text-[#333333] dark:text-white leading-tight">
+          Nexus<span className="text-teal-700 dark:text-teal-400">Enroll</span>
+        </h2>
+        <p className="text-[9px] font-bold text-teal-700 dark:text-teal-400 uppercase tracking-widest flex items-center gap-1">
+          <Sparkles className="w-2.5 h-2.5 text-amber-500" /> {role} PORTAL
+        </p>
+      </motion.div>
+    </Link>
+  );
+};

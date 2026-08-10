@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   role: Role;
   status?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthResponse {
@@ -18,6 +19,7 @@ export interface AuthResponse {
   role: Role;
   firstName: string;
   lastName: string;
+  avatarUrl?: string;
 }
 
 export interface AuthState {
