@@ -13,7 +13,10 @@ import {
   ArrowRight,
   Info,
   Eye,
-  EyeOff
+  EyeOff,
+  Check,
+  X,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services/authService';
@@ -44,7 +47,30 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
   const [signupEmail, setSignupEmail] = useState('');
   const [signupFirstName, setSignupFirstName] = useState('');
   const [signupLastName, setSignupLastName] = useState('');
-  const [signupPassword, setSignupPassword] = useState('Password123!');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
+
+  // Password Strength Evaluation Criteria
+  const passwordCriteria = {
+    minLength: signupPassword.length >= 8,
+    hasUpper: /[A-Z]/.test(signupPassword),
+    hasLower: /[a-z]/.test(signupPassword),
+    hasNumber: /[0-9]/.test(signupPassword),
+    hasSymbol: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(signupPassword),
+  };
+
+  const passedCount = Object.values(passwordCriteria).filter(Boolean).length;
+  const isStrongPassword = passedCount === 5;
+
+  const getStrengthLabel = () => {
+    if (passedCount <= 1) return { label: 'Very Weak', color: 'bg-rose-500', text: 'text-rose-600' };
+    if (passedCount === 2) return { label: 'Weak', color: 'bg-coral-500', text: 'text-coral-600' };
+    if (passedCount === 3) return { label: 'Medium', color: 'bg-amber-500', text: 'text-amber-600' };
+    if (passedCount === 4) return { label: 'Good', color: 'bg-teal-500', text: 'text-teal-600' };
+    return { label: 'Strong Password', color: 'bg-emerald-500', text: 'text-emerald-600' };
+  };
 
   // Common State
   const [error, setError] = useState('');
@@ -105,6 +131,23 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Check if password fulfills all strong security requirements
+    if (!isStrongPassword) {
+      const strengthError = 'Password does not satisfy all security requirements (min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special symbol).';
+      setError(strengthError);
+      showToast('Weak password. Please satisfy all requirements.', 'error');
+      return;
+    }
+
+    // Check if passwords match
+    if (signupPassword !== signupConfirmPassword) {
+      const matchError = 'Passwords do not match. Please make sure both passwords are identical.';
+      setError(matchError);
+      showToast('Passwords do not match.', 'error');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -257,20 +300,112 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
                 </div>
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-600 mb-1">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
-                  />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-600 mb-1">Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                    <input
+                      type={showSignupPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
+                      className="w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:border-[#006666] focus:ring-4 focus:ring-[#006666]/15 outline-none text-xs text-[#333333]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#006666] transition-colors"
+                      title={showSignupPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-600 mb-1">Confirm Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-2.5 w-4 h-4 text-[#006666]" />
+                    <input
+                      type={showSignupConfirmPassword ? "text" : "password"}
+                      required
+                      placeholder="••••••••"
+                      value={signupConfirmPassword}
+                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                      className={cn(
+                        'w-full pl-9 pr-9 py-2 rounded-xl bg-slate-50 border focus:ring-4 outline-none text-xs text-[#333333] transition-all',
+                        signupConfirmPassword && signupPassword !== signupConfirmPassword
+                          ? 'border-coral-500 focus:border-coral-500 focus:ring-coral-500/15'
+                          : 'border-slate-200 focus:border-[#006666] focus:ring-[#006666]/15'
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-[#006666] transition-colors"
+                      title={showSignupConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                    >
+                      {showSignupConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              {signupConfirmPassword && signupPassword !== signupConfirmPassword && (
+                <p className="text-[11px] font-semibold text-coral-600 flex items-center gap-1 mt-1">
+                  <span>⚠️ Passwords do not match</span>
+                </p>
+              )}
+
+              {/* Password Strength Meter & Requirements Checklist */}
+              {signupPassword && (
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2 text-[11px]">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-slate-500">Security Strength:</span>
+                    <span className={cn('font-extrabold text-xs', getStrengthLabel().text)}>
+                      {getStrengthLabel().label}
+                    </span>
+                  </div>
+
+                  {/* Dynamic Progress Indicator Bar */}
+                  <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className={cn('h-full transition-all duration-300', getStrengthLabel().color)}
+                      style={{ width: `${(passedCount / 5) * 100}%` }}
+                    />
+                  </div>
+
+                  {/* Requirements Checklist */}
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 pt-1 text-[10px]">
+                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.minLength ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                      {passwordCriteria.minLength ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      <span>8+ Characters</span>
+                    </div>
+
+                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasUpper ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                      {passwordCriteria.hasUpper ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      <span>Uppercase (A-Z)</span>
+                    </div>
+
+                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasLower ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                      {passwordCriteria.hasLower ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      <span>Lowercase (a-z)</span>
+                    </div>
+
+                    <div className={cn('flex items-center gap-1 font-medium', passwordCriteria.hasNumber ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                      {passwordCriteria.hasNumber ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      <span>Number (0-9)</span>
+                    </div>
+
+                    <div className={cn('flex items-center gap-1 font-medium col-span-2', passwordCriteria.hasSymbol ? 'text-emerald-700 font-bold' : 'text-slate-400')}>
+                      {passwordCriteria.hasSymbol ? <Check className="w-3 h-3 text-emerald-600 shrink-0" /> : <X className="w-3 h-3 text-slate-300 shrink-0" />}
+                      <span>Special Symbol (!@#$%^&*...)</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <button
                 type="submit"

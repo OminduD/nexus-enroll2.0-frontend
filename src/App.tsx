@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ToastProvider } from './components/ui/Toast';
+import { BackendHealthProvider } from './context/BackendHealthContext';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
@@ -36,77 +38,83 @@ import { NotificationBroadcastPage } from './pages/admin/NotificationBroadcastPa
 // Public Landing Page
 import LandingPage from './pages/LandingPage';
 
-// Common Pages
+// Common & Error Pages
 import { AccountPage } from './pages/common/AccountPage';
-
-const RootRedirect: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
-  if (!isAuthenticated || !user) return <Navigate to="/login" replace />;
-  if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
-  if (user.role === 'FACULTY') return <Navigate to="/faculty/dashboard" replace />;
-  return <Navigate to="/student/dashboard" replace />;
-};
+import { NotFoundPage } from './pages/error/NotFoundPage';
+import { ServerDownPage } from './pages/error/ServerDownPage';
+import { ForbiddenPage } from './pages/error/ForbiddenPage';
+import { ServerErrorPage } from './pages/error/ServerErrorPage';
 
 export const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public Landing & Auth Routes */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignupPage />} />
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <BackendHealthProvider>
+            <ToastProvider>
+              <BrowserRouter>
+                <Routes>
+                  {/* Public Landing & Auth Routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/landing" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
 
-              {/* Student Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
-                  <Route path="/student/dashboard" element={<StudentDashboard />} />
-                  <Route path="/student/courses" element={<CourseCatalogPage />} />
-                  <Route path="/student/schedule" element={<StudentSchedulePage />} />
-                  <Route path="/student/progress" element={<DegreeAuditPage />} />
-                  <Route path="/student/records" element={<AcademicRecordsPage />} />
-                  <Route path="/student/notifications" element={<NotificationsPage />} />
-                  <Route path="/student/account" element={<AccountPage />} />
-                </Route>
-              </Route>
+                  {/* Explicit Error Routes */}
+                  <Route path="/404" element={<NotFoundPage />} />
+                  <Route path="/403" element={<ForbiddenPage />} />
+                  <Route path="/500" element={<ServerErrorPage />} />
+                  <Route path="/server-down" element={<ServerDownPage />} />
 
-              {/* Faculty Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['FACULTY']} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/faculty" element={<Navigate to="/faculty/dashboard" replace />} />
-                  <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
-                  <Route path="/faculty/roster" element={<ClassRosterPage />} />
-                  <Route path="/faculty/grades" element={<GradeManagementPage />} />
-                  <Route path="/faculty/change-requests" element={<ChangeRequestsPage />} />
-                  <Route path="/faculty/account" element={<AccountPage />} />
-                </Route>
-              </Route>
+                  {/* Student Protected Routes */}
+                  <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
+                    <Route element={<DashboardLayout />}>
+                      <Route path="/student" element={<Navigate to="/student/dashboard" replace />} />
+                      <Route path="/student/dashboard" element={<StudentDashboard />} />
+                      <Route path="/student/courses" element={<CourseCatalogPage />} />
+                      <Route path="/student/schedule" element={<StudentSchedulePage />} />
+                      <Route path="/student/progress" element={<DegreeAuditPage />} />
+                      <Route path="/student/records" element={<AcademicRecordsPage />} />
+                      <Route path="/student/notifications" element={<NotificationsPage />} />
+                      <Route path="/student/account" element={<AccountPage />} />
+                    </Route>
+                  </Route>
 
-              {/* Admin Protected Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/courses" element={<CourseAdminPage />} />
-                  <Route path="/admin/grade-approvals" element={<GradeApprovalsPage />} />
-                  <Route path="/admin/change-requests" element={<AdminChangeRequestsPage />} />
-                  <Route path="/admin/users" element={<UserDirectoryPage />} />
-                  <Route path="/admin/reports" element={<SystemReportsPage />} />
-                  <Route path="/admin/notifications" element={<NotificationBroadcastPage />} />
-                  <Route path="/admin/account" element={<AccountPage />} />
-                </Route>
-              </Route>
+                  {/* Faculty Protected Routes */}
+                  <Route element={<ProtectedRoute allowedRoles={['FACULTY']} />}>
+                    <Route element={<DashboardLayout />}>
+                      <Route path="/faculty" element={<Navigate to="/faculty/dashboard" replace />} />
+                      <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
+                      <Route path="/faculty/roster" element={<ClassRosterPage />} />
+                      <Route path="/faculty/grades" element={<GradeManagementPage />} />
+                      <Route path="/faculty/change-requests" element={<ChangeRequestsPage />} />
+                      <Route path="/faculty/account" element={<AccountPage />} />
+                    </Route>
+                  </Route>
 
-              {/* Fallback Root Redirect */}
-              <Route path="*" element={<RootRedirect />} />
-            </Routes>
-          </BrowserRouter>
-        </ToastProvider>
-      </AuthProvider>
-    </ThemeProvider>
+                  {/* Admin Protected Routes */}
+                  <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+                    <Route element={<DashboardLayout />}>
+                      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+                      <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                      <Route path="/admin/courses" element={<CourseAdminPage />} />
+                      <Route path="/admin/grade-approvals" element={<GradeApprovalsPage />} />
+                      <Route path="/admin/change-requests" element={<AdminChangeRequestsPage />} />
+                      <Route path="/admin/users" element={<UserDirectoryPage />} />
+                      <Route path="/admin/reports" element={<SystemReportsPage />} />
+                      <Route path="/admin/notifications" element={<NotificationBroadcastPage />} />
+                      <Route path="/admin/account" element={<AccountPage />} />
+                    </Route>
+                  </Route>
+
+                  {/* Fallback Catch-All Route for Unknown Paths -> 404 */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </BrowserRouter>
+            </ToastProvider>
+          </BackendHealthProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
