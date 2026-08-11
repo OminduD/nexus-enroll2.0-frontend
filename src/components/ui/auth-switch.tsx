@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   User,
@@ -120,8 +121,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           : '/student/dashboard';
 
       navigate(dest);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid username or password. Please try again.');
+    } catch (err) {
+      const message = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
+      setError(message || 'Invalid username or password. Please try again.');
       showToast('Authentication failed.', 'error');
     } finally {
       setIsSubmitting(false);
@@ -174,8 +176,9 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
       });
 
       navigate('/student/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } catch (err) {
+      const message = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
+      setError(message || 'Registration failed. Please try again.');
       showToast('Account creation failed.', 'error');
     } finally {
       setIsSubmitting(false);

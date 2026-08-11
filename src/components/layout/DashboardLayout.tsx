@@ -1,3 +1,8 @@
+/**
+ * Shared page shell for authenticated dashboard routes: renders Sidebar,
+ * Header, and the ambient background around a page-transition-animated
+ * <Outlet />. No backend or context calls of its own.
+ */
 import React, { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';

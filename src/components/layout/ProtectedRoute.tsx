@@ -1,3 +1,8 @@
+/**
+ * Route guard that consumes AuthContext (useAuth) to redirect unauthenticated
+ * users to /login and role-mismatched users to /403, otherwise renders the
+ * nested route via <Outlet />.
+ */
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';

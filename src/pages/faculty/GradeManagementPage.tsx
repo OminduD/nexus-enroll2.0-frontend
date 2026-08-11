@@ -1,3 +1,8 @@
+/**
+ * Faculty grade entry/submission workflow for a section. Calls
+ * facultyService.getGrades (GET /api/faculty/grades), saveDraftGrade
+ * (POST /api/faculty/grades/draft), and submitGrade (POST /api/faculty/grades/submit).
+ */
 import React, { useEffect, useState } from 'react';
 import { CheckSquare, Save, Send, Plus, CheckCircle2 } from 'lucide-react';
 import { facultyService } from '../../services/facultyService';

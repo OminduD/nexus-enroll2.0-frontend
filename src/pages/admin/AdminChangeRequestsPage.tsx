@@ -1,3 +1,9 @@
+/**
+ * Admin review queue for course change requests. Calls
+ * courseService.getChangeRequests (GET /api/courses/change-requests) and
+ * approveChangeRequest/rejectChangeRequest (PUT
+ * /api/courses/change-requests/{id}/approve|reject).
+ */
 import React, { useEffect, useState } from 'react';
 import { FileCode, CheckCircle2, XCircle } from 'lucide-react';
 import { courseService } from '../../services/courseService';

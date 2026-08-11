@@ -1,3 +1,10 @@
+/**
+ * Provides BackendHealthContext, tracking whether the API gateway is
+ * reachable. checkHealth() probes GET /actuator/health (falling back to
+ * /api/v1/health, then an OPTIONS request); it also listens for the
+ * nexus:backend-up/backend-down window events dispatched by the axios
+ * interceptors in src/services/api.ts.
+ */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 
@@ -42,8 +49,8 @@ export const BackendHealthProvider: React.FC<{ children: React.ReactNode }> = ({
       setLastChecked(new Date());
       setIsChecking(false);
       return true;
-    } catch (err: any) {
-      const errorMsg = err?.message || 'Unable to connect to backend server';
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unable to connect to backend server';
       setIsBackendDown(true);
       setLastError(errorMsg);
       setLastChecked(new Date());

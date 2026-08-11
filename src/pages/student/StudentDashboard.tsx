@@ -1,3 +1,9 @@
+/**
+ * Student portal landing page: overview, timetable, and academic tabs.
+ * Consumes AuthContext for the current user, and calls studentService
+ * (GET /api/students, /api/students/{id}/schedule) and notificationService
+ * (GET /api/notifications/user/{id}) to populate its widgets.
+ */
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StatCard } from '../../components/ui/StatCard';
@@ -55,9 +61,9 @@ export const StudentDashboard: React.FC = () => {
         const uc = await notificationService.getUnreadCount(user?.id || 1);
 
         setProfile(p);
-        const sArray = Array.isArray(s) ? s : ((s as any)?.content || []);
+        const sArray = Array.isArray(s) ? s : ((s as unknown as { content?: StudentEnrollment[] })?.content || []);
         setSchedule(sArray);
-        const nArray = Array.isArray(n) ? n : ((n as any)?.content || []);
+        const nArray = Array.isArray(n) ? n : ((n as unknown as { content?: NotificationItem[] })?.content || []);
         setNotifications(nArray);
         setUnreadCount(typeof uc === 'number' ? uc : 0);
       } catch (err) {

@@ -1,3 +1,10 @@
+/**
+ * Shared HTTP layer for all `src/services/*.ts` calls: builds the axios
+ * client against VITE_API_BASE_URL (the Spring Cloud Gateway on :8080) and
+ * attaches the JWT from localStorage to every outgoing request. Also
+ * dispatches the nexus:backend-up/backend-down window events that
+ * BackendHealthContext listens for.
+ */
 import axios from 'axios';
 
 // `??` (not `||`) so an explicitly empty string is respected: in Docker the
@@ -69,9 +76,40 @@ apiClient.interceptors.response.use(
   }
 );
 
-export const ensureArray = <T>(data: any, fallback: T[] = []): T[] => {
+type ArrayEnvelope<T> = T[] | { content?: T[]; data?: T[] } | null | undefined;
+
+export const ensureArray = <T>(data: ArrayEnvelope<T>, fallback: T[] = []): T[] => {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.content)) return data.content;
   if (data && Array.isArray(data.data)) return data.data;
   return fallback;
 };
+
+// Raw shapes returned by the backend before a service maps them onto the
+// frontend's `src/types/*.ts` interfaces. Fields are optional since the
+// backend DTO doesn't guarantee every one is populated.
+export interface RawScheduleItem {
+  sectionId?: number;
+  courseCode?: string;
+  courseTitle?: string;
+  scheduleDays?: string;
+  startTime?: string;
+  endTime?: string;
+  scheduleTime?: string;
+  location?: string;
+  status?: string;
+}
+
+export interface RawCompletedCourseItem {
+  id?: number;
+  studentId?: number;
+  courseCode?: string;
+  courseTitle?: string;
+  grade?: string;
+  letterGrade?: string;
+  gradePoints?: number;
+  semester?: string;
+  year?: number;
+  credits?: number;
+  creditsEarned?: number;
+}

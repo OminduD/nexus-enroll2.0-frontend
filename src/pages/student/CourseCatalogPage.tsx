@@ -1,3 +1,9 @@
+/**
+ * Course browsing and section enrollment page. Calls courseService
+ * (GET /api/courses, /api/courses/departments, /api/courses/sections) and
+ * studentService (POST /api/enrollments, POST /api/enrollments/waitlist) to
+ * enroll or waitlist the current student into a chosen section.
+ */
 import React, { useEffect, useState } from 'react';
 import { Search, Filter, BookOpen, Clock, MapPin, PlusCircle } from 'lucide-react';
 import { courseService } from '../../services/courseService';

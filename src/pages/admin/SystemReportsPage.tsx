@@ -1,3 +1,8 @@
+/**
+ * Admin analytics reports (course popularity, faculty workload charts).
+ * Calls reportService.getCoursePopularity (GET /api/reports/course-popularity)
+ * and getFacultyWorkload (GET /api/reports/faculty-workload).
+ */
 import React, { useEffect, useState } from 'react';
 import { BarChart3, Users, BookOpen, Download } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';

@@ -1,3 +1,8 @@
+/**
+ * Student notifications inbox with type/priority filters. Calls
+ * notificationService.getUserNotifications (GET /api/notifications/user/{id})
+ * and markAllAsRead (POST /api/notifications/user/{id}/read-all).
+ */
 import React, { useEffect, useState } from 'react';
 import { Bell, CheckCheck, Filter, AlertTriangle, BookCheck, Info } from 'lucide-react';
 import { notificationService } from '../../services/notificationService';

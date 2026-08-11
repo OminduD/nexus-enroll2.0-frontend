@@ -1,3 +1,8 @@
+/**
+ * Renders degree progress/requirements tracking for the student. Calls
+ * studentService.getProfile (GET /api/students) then getDegreeProgress
+ * (GET /api/students/{id}/progress) for completed vs. remaining requirements.
+ */
 import React, { useEffect, useState } from 'react';
 import { CheckCircle2, Circle, Award, BookOpen } from 'lucide-react';
 import { studentService } from '../../services/studentService';

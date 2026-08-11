@@ -1,3 +1,8 @@
+/**
+ * Faculty-facing course change request form and list. Calls
+ * courseService.getChangeRequests (GET /api/courses/change-requests) and
+ * createChangeRequest (POST /api/courses/change-requests).
+ */
 import React, { useEffect, useState } from 'react';
 import { FileCode, Send, Plus } from 'lucide-react';
 import { courseService } from '../../services/courseService';

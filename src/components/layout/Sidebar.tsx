@@ -1,3 +1,8 @@
+/**
+ * Role-based navigation sidebar (student/faculty/admin nav items) and sign
+ * out control. Consumes AuthContext (useAuth) for the current user's role
+ * and logout(); no direct backend calls.
+ */
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {

@@ -1,3 +1,7 @@
+/**
+ * Provides ThemeContext to the app. Currently pins the theme to 'light'
+ * (toggleTheme is a no-op); no backend dependency.
+ */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light';

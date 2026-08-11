@@ -1,3 +1,9 @@
+/**
+ * Admin analytics/telemetry landing page. Calls reportService
+ * (GET /api/reports/enrollment-stats, plus a client-side department
+ * distribution) and healthService.checkSystemHealth (GET /actuator/health)
+ * to render enrollment charts and per-microservice status.
+ */
 import React, { useEffect, useState } from 'react';
 import { StatCard } from '../../components/ui/StatCard';
 import {
@@ -24,6 +30,8 @@ import { EnrollmentTrendItem, DepartmentDistributionItem } from '../../types/rep
 import { Badge } from '../../components/ui/Badge';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 export const AdminDashboard: React.FC = () => {
   const [trends, setTrends] = useState<EnrollmentTrendItem[]>([]);
@@ -116,7 +124,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="text-xs font-mono font-medium text-teal-200/90 bg-white/10 backdrop-blur-md px-3.5 py-1 rounded-full border border-white/15">
-              Gateway: <span className={`font-extrabold ${systemHealth.isOnline ? 'text-emerald-400' : 'text-red-400'}`}>{systemHealth.isOnline ? 'http://localhost:8080 (UP)' : 'Offline / Unreachable'}</span>
+              Gateway: <span className={`font-extrabold ${systemHealth.isOnline ? 'text-emerald-400' : 'text-red-400'}`}>{systemHealth.isOnline ? `${API_BASE_URL} (UP)` : 'Offline / Unreachable'}</span>
             </div>
           </div>
 

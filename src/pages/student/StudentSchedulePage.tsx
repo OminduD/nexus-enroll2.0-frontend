@@ -1,3 +1,8 @@
+/**
+ * Student's current schedule/timetable with a drop-course flow. Calls
+ * studentService.getSchedule (GET /api/students/{id}/schedule) and
+ * dropCourse (DELETE /api/enrollments/{enrollmentId}).
+ */
 import React, { useEffect, useState } from 'react';
 import { Calendar, Trash2, MapPin, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { studentService } from '../../services/studentService';

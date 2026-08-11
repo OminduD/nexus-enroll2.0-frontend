@@ -1,3 +1,9 @@
+/**
+ * Faculty portal landing page (overview/curve/office-hours tabs). Consumes
+ * AuthContext for the current user, and calls facultyService.getProfile
+ * (GET /api/faculty/user/{id}) and getGrades (GET /api/faculty/grades) to
+ * populate the profile summary and pending-grades queue.
+ */
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { StatCard } from '../../components/ui/StatCard';

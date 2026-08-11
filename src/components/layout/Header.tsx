@@ -1,3 +1,9 @@
+/**
+ * Top navigation bar: consumes AuthContext for the signed-in user and
+ * logout(), and renders NotificationPopover (which calls
+ * notificationService, GET /api/notifications/user/{id}) and the global
+ * search modal.
+ */
 import React, { useState, useEffect } from 'react';
 import { Search, LogOut, Menu, Sparkles, Command, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';

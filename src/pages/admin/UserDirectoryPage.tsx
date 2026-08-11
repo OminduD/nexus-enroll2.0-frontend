@@ -1,3 +1,9 @@
+/**
+ * Admin user directory and staff account provisioning. Calls
+ * studentService.getAllStudents (GET /api/students) to list users, and
+ * authService.provisionStaffAccount (POST /api/auth/provision-staff) to
+ * create faculty/admin accounts.
+ */
 import React, { useEffect, useState } from 'react';
 import { Users, Search, Shield, ShieldOff, Eye, UserPlus, GraduationCap, School, CheckCircle2, Lock, Mail, User } from 'lucide-react';
 import { studentService } from '../../services/studentService';

@@ -1,3 +1,9 @@
+/**
+ * Admin course catalog management (create/edit courses). Calls
+ * courseService.getCourses (GET /api/courses), getDegreePrograms
+ * (GET /api/courses/programs), createCourse (POST /api/courses), and
+ * updateCourse (PUT /api/courses/{id}).
+ */
 import React, { useEffect, useState } from 'react';
 import { BookOpen, Plus, Edit3, Search } from 'lucide-react';
 import { courseService } from '../../services/courseService';

@@ -176,7 +176,7 @@ export const AccountPage: React.FC = () => {
               {(['All', 'Casual', 'Professional', 'Executive', '3D Vector'] as const).map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setCategoryFilter(cat as any)}
+                  onClick={() => setCategoryFilter(cat)}
                   className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all ${
                     categoryFilter === cat
                       ? 'bg-white dark:bg-slate-700 text-teal-800 dark:text-teal-200 shadow-2xs'

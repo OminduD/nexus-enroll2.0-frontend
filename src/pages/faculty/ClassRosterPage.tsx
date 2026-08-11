@@ -1,3 +1,8 @@
+/**
+ * Lists a faculty member's course sections and each section's class roster.
+ * Calls courseService.getSections (GET /api/courses/sections) and
+ * facultyService.getRoster (GET /api/faculty/roster?sectionId=).
+ */
 import React, { useEffect, useState } from 'react';
 import { Mail, Eye, Search } from 'lucide-react';
 import { facultyService } from '../../services/facultyService';

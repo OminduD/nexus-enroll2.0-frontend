@@ -1,4 +1,4 @@
-import { apiClient, ensureArray, withMockFallback } from './api';
+import { apiClient, ensureArray, withMockFallback, RawScheduleItem } from './api';
 import { StudentProfile, StudentEnrollment, DegreeProgress } from '../types/student';
 import { MOCK_STUDENT_PROFILE, MOCK_STUDENT_ENROLLMENTS, MOCK_DEGREE_PROGRESS, MOCK_SECTIONS } from './mockData';
 
@@ -52,7 +52,7 @@ export const studentService = {
       const response = await apiClient.get(`/api/students/${studentId}/schedule`);
       const data = response.data.data || response.data;
       if (data && Array.isArray(data.items)) {
-        return data.items.map((item: any, index: number) => ({
+        return data.items.map((item: RawScheduleItem, index: number) => ({
           ...MOCK_STUDENT_ENROLLMENTS[0],
           id: item.sectionId || index,
           sectionId: item.sectionId,

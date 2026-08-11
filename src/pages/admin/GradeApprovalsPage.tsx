@@ -1,3 +1,8 @@
+/**
+ * Admin review queue for pending faculty grade submissions. Calls
+ * facultyService.getGrades (GET /api/faculty/grades) and
+ * approveGrade/rejectGrade (POST /api/faculty/grades/approve|reject).
+ */
 import React, { useEffect, useState } from 'react';
 import { CheckSquare, CheckCircle2, XCircle } from 'lucide-react';
 import { facultyService } from '../../services/facultyService';

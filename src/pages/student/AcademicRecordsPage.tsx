@@ -1,3 +1,8 @@
+/**
+ * Renders the student's academic transcript/records list. Calls
+ * studentService.getProfile (GET /api/students) to resolve the student id,
+ * then recordService.getCompletedCourses (GET /api/records/completed-courses).
+ */
 import React, { useEffect, useState } from 'react';
 import { FileSpreadsheet, Award, Download } from 'lucide-react';
 import { recordService } from '../../services/recordService';

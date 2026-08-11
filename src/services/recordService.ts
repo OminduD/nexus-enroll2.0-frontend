@@ -1,4 +1,4 @@
-import { apiClient, ensureArray, withMockFallback } from './api';
+import { apiClient, ensureArray, withMockFallback, RawCompletedCourseItem } from './api';
 import { CompletedCourseRecord } from '../types/student';
 import { MOCK_COMPLETED_RECORDS } from './mockData';
 
@@ -8,7 +8,7 @@ export const recordService = {
       const response = await apiClient.get(`/api/records/completed-courses?studentId=${studentId}`);
       const data = response.data.data || response.data;
       if (Array.isArray(data)) {
-        return data.map((item: any, index: number) => {
+        return data.map((item: RawCompletedCourseItem, index: number) => {
           let pts = 0.0;
           if (item.grade?.startsWith('A')) pts = 4.0;
           else if (item.grade?.startsWith('B')) pts = 3.0;

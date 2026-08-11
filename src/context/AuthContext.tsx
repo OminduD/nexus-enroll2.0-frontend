@@ -1,3 +1,9 @@
+/**
+ * Provides AuthContext (user, token, login/logout/updateUser) to the app,
+ * persisting the session to localStorage. Does not call the backend itself
+ * -- the actual POST /api/auth/login request happens in
+ * src/services/authService.ts, which then hands its result to login() here.
+ */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Role } from '../types/auth';
 import { getDefaultAvatarForRole } from '../lib/avatars';

@@ -1,3 +1,7 @@
+/**
+ * Admin form for broadcasting a system notification. Calls
+ * notificationService.sendNotification (POST /api/notifications).
+ */
 import React, { useState } from 'react';
 import { Send, Bell } from 'lucide-react';
 import { notificationService } from '../../services/notificationService';
