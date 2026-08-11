@@ -85,14 +85,15 @@ apiClient.interceptors.response.use(
   }
 );
 
-type ArrayEnvelope<T> = T[] | { content?: T[]; data?: T[] } | null | undefined;
+type ArrayEnvelope<T> = T[] | { content?: T[]; data?: T[] | { content?: T[]; data?: T[] } } | null | undefined;
 
-export const ensureArray = <T>(data: ArrayEnvelope<T>, fallback: T[] = []): T[] => {
+export const ensureArray = <T>(data: ArrayEnvelope<T> | any, fallback: T[] = []): T[] => {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.content)) return data.content;
   if (data && Array.isArray(data.data)) return data.data;
-  if (data && data.data && Array.isArray(data.data.content)) return data.data.content;
-  if (data && data.data && Array.isArray(data.data.data)) return data.data.data;
+  const d = data as any;
+  if (d && d.data && Array.isArray(d.data.content)) return d.data.content;
+  if (d && d.data && Array.isArray(d.data.data)) return d.data.data;
   return fallback;
 };
 
