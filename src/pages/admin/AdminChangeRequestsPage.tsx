@@ -11,8 +11,10 @@ import { ChangeRequest } from '../../types/course';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const AdminChangeRequestsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [requests, setRequests] = useState<ChangeRequest[]>([]);
   const [selectedReq, setSelectedReq] = useState<ChangeRequest | null>(null);
   const [reviewComment, setReviewComment] = useState('');
@@ -22,12 +24,22 @@ export const AdminChangeRequestsPage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadRequests = async () => {
-    const data = await courseService.getChangeRequests();
-    setRequests(data);
+    setIsLoading(true);
+    try {
+      const data = await courseService.getChangeRequests();
+      setRequests(data);
+    } catch (e) {
+      console.warn('Admin change requests fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadRequests();
+    const handleUpdate = () => loadRequests();
+    window.addEventListener('nexus_change_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_change_requests_updated', handleUpdate);
   }, []);
 
   const handleOpenActionModal = (req: ChangeRequest, action: 'APPROVE' | 'REJECT') => {
@@ -57,6 +69,10 @@ export const AdminChangeRequestsPage: React.FC = () => {
       showToast('Action failed.', 'error');
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">

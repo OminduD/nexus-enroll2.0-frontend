@@ -13,6 +13,7 @@ import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 
 export const CourseCatalogPage: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -118,7 +119,7 @@ export const CourseCatalogPage: React.FC = () => {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-slate-200/80 p-5 rounded-2xl h-56 animate-pulse" />
+            <CardSkeleton key={i} className="h-56" />
           ))}
         </div>
       ) : courses.length === 0 ? (

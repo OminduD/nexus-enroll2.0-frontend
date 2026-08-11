@@ -10,8 +10,10 @@ import { ChangeRequest, ChangeRequestType } from '../../types/course';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const ChangeRequestsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [requests, setRequests] = useState<ChangeRequest[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,12 +27,22 @@ export const ChangeRequestsPage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadRequests = async () => {
-    const data = await courseService.getChangeRequests();
-    setRequests(data);
+    setIsLoading(true);
+    try {
+      const data = await courseService.getChangeRequests();
+      setRequests(data);
+    } catch (e) {
+      console.warn('Faculty change requests fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadRequests();
+    const handleUpdate = () => loadRequests();
+    window.addEventListener('nexus_change_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_change_requests_updated', handleUpdate);
   }, []);
 
   const handleSubmitRequest = async () => {
@@ -46,6 +58,10 @@ export const ChangeRequestsPage: React.FC = () => {
       showToast('Failed to submit change request.', 'error');
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={5} />;
+  }
 
   return (
     <div className="space-y-6">

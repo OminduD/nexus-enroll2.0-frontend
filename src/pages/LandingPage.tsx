@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import FluidFlowGrid from '../components/ui/fluid-flow-grid';
 import HoverFooter from '../components/ui/hover-footer';
+import { ButtonWithIcon } from '../components/ui/button-with-icon';
 import {
   GraduationCap,
   BookOpen,
@@ -155,24 +156,15 @@ export const LandingPage: React.FC = () => {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'py-2.5 px-4 sm:px-8 bg-white/95 backdrop-blur-2xl border-b border-teal-500/20 shadow-xl shadow-slate-900/5'
-            : 'py-4 px-4 sm:px-8 bg-white/80 backdrop-blur-md border-b border-slate-200/80 shadow-sm'
+            ? 'py-3 px-4 sm:px-8 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 shadow-sm'
+            : 'py-5 px-4 sm:px-8 bg-transparent border-b border-transparent shadow-none'
         }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           
           {/* Logo with Gradient Sheen Ring & Live System Status Badge */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              {/* Pulsing Outer Glow Aura */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 via-coral-400 to-teal-600 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
-              
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-teal-700 via-teal-600 to-teal-900 p-0.5 shadow-lg shadow-teal-900/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
-                <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center group-hover:bg-slate-900 transition-colors">
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-teal-400 group-hover:rotate-12 transition-transform duration-300" />
-                </div>
-              </div>
-            </div>
+            <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-10 h-10 sm:w-11 sm:h-11 object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-sm flex-shrink-0" />
 
             <div>
               <div className="flex items-center gap-2">
@@ -229,20 +221,13 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center space-x-2.5 sm:space-x-3">
             <Link
               to="/login"
-              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold text-slate-700 hover:text-teal-700 bg-slate-100/80 hover:bg-slate-200/80 border border-slate-200/80 rounded-xl transition-all duration-200 shadow-sm hover:shadow"
+              className="hidden sm:inline-flex items-center px-5 py-2.5 text-xs sm:text-sm font-extrabold text-slate-700 hover:text-teal-700 bg-white/90 hover:bg-slate-100 border border-slate-200/90 rounded-full transition-all shadow-sm"
             >
               Sign In
             </Link>
 
-            <Link
-              to="/signup"
-              className="relative group px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-teal-700 via-teal-600 to-teal-800 hover:from-teal-600 hover:to-teal-700 shadow-md shadow-teal-900/20 hover:shadow-teal-900/30 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center space-x-1.5 sm:space-x-2 overflow-hidden"
-            >
-              {/* Button Shimmer Reflection */}
-              <div className="absolute inset-0 w-1/2 h-full bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-out pointer-events-none" />
-
-              <span>Get Started</span>
-              <ArrowRight className="w-4 h-4 text-teal-200 group-hover:translate-x-1 transition-transform" />
+            <Link to="/signup">
+              <ButtonWithIcon label="Get Started" icon={<ArrowRight size={16} />} />
             </Link>
 
             {/* Mobile Navigation Toggle Button */}

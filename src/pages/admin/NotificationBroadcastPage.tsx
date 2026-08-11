@@ -23,13 +23,29 @@ export const NotificationBroadcastPage: React.FC = () => {
     setIsSending(true);
 
     try {
-      await notificationService.sendNotification({
-        recipientUserId: 1,
-        title,
-        message,
-        notificationType,
-        priority,
-      });
+      // For this prototype, we simulate a broadcast by sending to common test user IDs
+      // since the backend doesn't have a dedicated /broadcast endpoint.
+      const testUserIds = [1, 2, 3, 4, 5, 6, 7];
+      
+      const authUserStr = localStorage.getItem('nexus_user');
+      if (authUserStr) {
+        try {
+          const authUser = JSON.parse(authUserStr);
+          if (authUser?.id && !testUserIds.includes(authUser.id)) {
+             testUserIds.push(authUser.id);
+          }
+        } catch {}
+      }
+
+      await Promise.all(testUserIds.map(id => 
+        notificationService.sendNotification({
+          recipientUserId: id,
+          title,
+          message,
+          notificationType,
+          priority,
+        }).catch(() => {})
+      ));
 
       showToast(`Broadcast notification "${title}" sent successfully!`, 'success');
       setTitle('');

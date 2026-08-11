@@ -9,21 +9,41 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 import { reportService } from '../../services/reportService';
 import { CoursePopularityItem, FacultyWorkloadItem } from '../../types/report';
 import { useToast } from '../../components/ui/Toast';
+import { CardSkeleton } from '../../components/ui/Skeleton';
 
 export const SystemReportsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [popularity, setPopularity] = useState<CoursePopularityItem[]>([]);
   const [workload, setWorkload] = useState<FacultyWorkloadItem[]>([]);
   const { showToast } = useToast();
 
   useEffect(() => {
     const loadReports = async () => {
-      const p = await reportService.getCoursePopularity();
-      const w = await reportService.getFacultyWorkload();
-      setPopularity(p);
-      setWorkload(w);
+      setIsLoading(true);
+      try {
+        const p = await reportService.getCoursePopularity();
+        const w = await reportService.getFacultyWorkload();
+        setPopularity(p);
+        setWorkload(w);
+      } catch (e) {
+        console.warn('System reports fallback:', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadReports();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardSkeleton className="h-80" />
+          <CardSkeleton className="h-80" />
+        </div>
+      </div>
+    );
+  }
 
   const handleExportCSV = () => {
     showToast('Exported system analytical report as CSV file!', 'success');

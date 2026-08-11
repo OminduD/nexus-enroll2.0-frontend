@@ -53,8 +53,8 @@ export const ServerErrorPage: React.FC<{ errorDetails?: string }> = ({ errorDeta
       {/* Header */}
       <header className="px-6 py-5 border-b border-slate-800/80 backdrop-blur-md bg-slate-950/70 relative z-10 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center shadow-lg shadow-rose-900/30">
-            <AlertOctagon className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-rose-400 p-1 flex items-center justify-center shadow-lg shadow-rose-900/30">
+            <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <span className="font-bold text-lg text-white tracking-tight">

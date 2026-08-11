@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Bell, CheckCheck, Info, BookCheck, AlertTriangle } from 'lucide-react';
 import { NotificationItem } from '../../types/notification';
 import { notificationService } from '../../services/notificationService';
@@ -15,6 +15,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const loadNotifications = async () => {
     const list = await notificationService.getUserNotifications(userId);
@@ -25,7 +26,24 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
 
   useEffect(() => {
     loadNotifications();
+    const handleUpdate = () => {
+      loadNotifications();
+    };
+    window.addEventListener('nexus_notifications_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_notifications_updated', handleUpdate);
   }, [userId]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   const handleMarkAllRead = async () => {
     await notificationService.markAllAsRead(userId);
@@ -35,14 +53,15 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
   const handleViewAll = () => {
     setIsOpen(false);
     if (role === 'STUDENT') navigate('/student/notifications');
-    else if (role === 'ADMIN') navigate('/admin/notifications');
+    else if (role === 'FACULTY') navigate('/faculty/notifications');
+    else if (role === 'ADMIN') navigate('/admin/inbox');
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={popoverRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-xl text-[#333333] hover:bg-slate-100 transition-colors"
+        className="relative p-2 rounded-xl text-[#333333] dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
         title="Notifications"
       >
         <Bell className="w-5 h-5" />
@@ -54,9 +73,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
       </button>
 
       {isOpen && (
-        <>
-          <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl p-4 shadow-2xl z-40 border border-slate-200 animate-slide-up text-[#333333]">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-2xl z-50 border border-slate-200 dark:border-slate-800 animate-slide-up text-[#333333] dark:text-slate-100">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
               <div className="flex items-center gap-2">
                 <h4 className="font-bold text-[#333333]">Notifications</h4>
@@ -107,8 +124,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ userId
               </button>
             </div>
           </div>
-        </>
-      )}
+        )}
     </div>
   );
 };

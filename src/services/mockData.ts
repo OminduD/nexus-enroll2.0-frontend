@@ -180,6 +180,58 @@ export const MOCK_STUDENT_PROFILE: StudentProfile = {
   gpa: 3.82,
 };
 
+export const MOCK_ALL_STUDENTS: StudentProfile[] = [
+  MOCK_STUDENT_PROFILE,
+  {
+    id: 2,
+    userId: 5,
+    studentIdNumber: 'NEX-2024-7711',
+    firstName: 'Sarah',
+    lastName: 'Jenkins',
+    email: 'sarah.j@nexus.edu',
+    major: 'Electrical Engineering',
+    enrollmentYear: 2024,
+    academicStanding: 'GOOD_STANDING',
+    gpa: 3.65,
+  },
+  {
+    id: 3,
+    userId: 6,
+    studentIdNumber: 'NEX-2023-9090',
+    firstName: 'Marcus',
+    lastName: 'Vance',
+    email: 'marcus.vance@nexus.edu',
+    major: 'Mathematics',
+    enrollmentYear: 2023,
+    academicStanding: 'DEANS_LIST',
+    gpa: 3.95,
+  },
+  {
+    id: 4,
+    userId: 7,
+    studentIdNumber: 'NEX-2025-1102',
+    firstName: 'Emily',
+    lastName: 'Watson',
+    email: 'emily.w@nexus.edu',
+    major: 'Computer Science',
+    enrollmentYear: 2025,
+    academicStanding: 'GOOD_STANDING',
+    gpa: 3.88,
+  },
+  {
+    id: 5,
+    userId: 8,
+    studentIdNumber: 'NEX-2024-5541',
+    firstName: 'David',
+    lastName: 'Miller',
+    email: 'david.m@nexus.edu',
+    major: 'Business Administration',
+    enrollmentYear: 2024,
+    academicStanding: 'GOOD_STANDING',
+    gpa: 3.52,
+  }
+];
+
 export const MOCK_STUDENT_ENROLLMENTS: StudentEnrollment[] = [
   {
     id: 101,

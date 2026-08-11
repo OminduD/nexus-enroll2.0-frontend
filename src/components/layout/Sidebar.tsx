@@ -70,6 +70,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     { label: 'My Courses & Rosters', href: '/faculty/roster', icon: Users },
     { label: 'Grade Management', href: '/faculty/grades', icon: CheckSquare },
     { label: 'Change Requests', href: '/faculty/change-requests', icon: FileCode },
+    { label: 'Notifications', href: '/faculty/notifications', icon: Bell },
     { label: 'My Account', href: '/faculty/account', icon: UserIcon },
   ];
 
@@ -81,6 +82,7 @@ const SidebarContent: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     { label: 'User Directory', href: '/admin/users', icon: Users },
     { label: 'System Reports', href: '/admin/reports', icon: BarChart3 },
     { label: 'Broadcast Notification', href: '/admin/notifications', icon: Send },
+    { label: 'Inbox', href: '/admin/inbox', icon: Bell },
     { label: 'My Account', href: '/admin/account', icon: UserIcon },
   ];
 
@@ -178,9 +180,7 @@ const LogoHeader = ({ open, role }: { open: boolean; role: string }) => {
         open ? "justify-start px-1" : "justify-center"
       )}
     >
-      <div className="relative flex items-center justify-center w-9 h-9 rounded-2xl bg-gradient-to-tr from-teal-700 to-teal-600 text-white font-black text-lg shadow-md flex-shrink-0">
-        N
-      </div>
+      <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-9 h-9 object-contain flex-shrink-0" />
       <motion.div
         animate={{
           display: open ? "flex" : "none",

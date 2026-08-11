@@ -88,6 +88,7 @@ export const App: React.FC = () => {
                       <Route path="/faculty/roster" element={<ClassRosterPage />} />
                       <Route path="/faculty/grades" element={<GradeManagementPage />} />
                       <Route path="/faculty/change-requests" element={<ChangeRequestsPage />} />
+                      <Route path="/faculty/notifications" element={<NotificationsPage />} />
                       <Route path="/faculty/account" element={<AccountPage />} />
                     </Route>
                   </Route>
@@ -103,6 +104,7 @@ export const App: React.FC = () => {
                       <Route path="/admin/users" element={<UserDirectoryPage />} />
                       <Route path="/admin/reports" element={<SystemReportsPage />} />
                       <Route path="/admin/notifications" element={<NotificationBroadcastPage />} />
+                      <Route path="/admin/inbox" element={<NotificationsPage />} />
                       <Route path="/admin/account" element={<AccountPage />} />
                     </Route>
                   </Route>

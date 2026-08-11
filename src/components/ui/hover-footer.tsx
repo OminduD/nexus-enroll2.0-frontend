@@ -104,7 +104,7 @@ export const TextHoverEffect = ({
         textAnchor="middle"
         dominantBaseline="middle"
         strokeWidth="0.4"
-        className="fill-transparent stroke-slate-800 font-[helvetica] text-7xl font-extrabold tracking-tighter"
+        className="fill-transparent stroke-teal-600/30 font-[helvetica] text-7xl font-extrabold tracking-tighter"
         style={{ opacity: hovered ? 0.7 : 0.15 }}
       >
         {text}
@@ -150,7 +150,7 @@ export const FooterBackgroundGradient = () => {
       className="absolute inset-0 z-0 pointer-events-none"
       style={{
         background:
-          "radial-gradient(125% 125% at 50% 10%, #0F172Aee 40%, #0d948825 100%)",
+          "radial-gradient(125% 125% at 50% 10%, #ffffff 40%, #0d948812 100%)",
       }}
     />
   );
@@ -186,17 +186,17 @@ export function HoverFooter() {
   // Contact info data
   const contactInfo = [
     {
-      icon: <Mail size={18} className="text-teal-400 shrink-0" />,
+      icon: <Mail size={18} className="text-teal-600 shrink-0" />,
       text: "support@nexusenroll.edu",
       href: "mailto:support@nexusenroll.edu",
     },
     {
-      icon: <Phone size={18} className="text-teal-400 shrink-0" />,
+      icon: <Phone size={18} className="text-teal-600 shrink-0" />,
       text: "+1 (800) 555-NEXUS",
       href: "tel:+18005556398",
     },
     {
-      icon: <MapPin size={18} className="text-teal-400 shrink-0" />,
+      icon: <MapPin size={18} className="text-teal-600 shrink-0" />,
       text: "University Academic Center, Hall A",
     },
   ];
@@ -211,25 +211,21 @@ export function HoverFooter() {
   ];
 
   return (
-    <footer className="bg-slate-950 relative h-fit rounded-3xl overflow-hidden m-4 sm:m-8 border border-slate-800/80 shadow-2xl text-slate-300">
+    <footer className="bg-white relative h-fit rounded-3xl overflow-hidden m-4 sm:m-8 border border-slate-200/90 shadow-xl shadow-slate-900/5 text-slate-700">
       <div className="max-w-7xl mx-auto p-8 sm:p-14 z-40 relative">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-14 pb-8">
           {/* Brand Section */}
           <div className="flex flex-col space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-400 p-0.5 shadow-lg shadow-teal-900/30 flex items-center justify-center">
-                <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-teal-400" />
-                </div>
-              </div>
-              <span className="text-white text-2xl font-black tracking-tight">
-                NEXUS<span className="text-coral-500 font-mono">.ENROLL</span>
+              <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-10 h-10 object-contain flex-shrink-0" />
+              <span className="text-slate-900 text-2xl font-black tracking-tight">
+                NEXUS<span className="text-teal-700 font-mono">.ENROLL</span>
               </span>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Nexus Enroll 2.0 is an enterprise academic course registration, schedule planning, and degree audit platform for modern universities.
             </p>
-            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-emerald-400">
+            <div className="pt-2 flex items-center gap-2 text-xs font-mono text-teal-700 font-bold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               <span>All Systems Operational</span>
             </div>
@@ -238,7 +234,7 @@ export function HoverFooter() {
           {/* Footer Link Sections */}
           {footerLinks.map((section) => (
             <div key={section.title}>
-              <h4 className="text-white text-base font-bold mb-5 tracking-tight">
+              <h4 className="text-slate-900 text-base font-black mb-5 tracking-tight">
                 {section.title}
               </h4>
               <ul className="space-y-3 text-xs">
@@ -246,12 +242,12 @@ export function HoverFooter() {
                   <li key={link.label} className="relative">
                     <a
                       href={link.href}
-                      className="hover:text-teal-300 transition-colors inline-flex items-center gap-1"
+                      className="text-slate-600 hover:text-teal-700 font-medium transition-colors inline-flex items-center gap-1"
                     >
                       {link.label}
                     </a>
                     {link.pulse && (
-                      <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+                      <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
                     )}
                   </li>
                 ))}
@@ -261,22 +257,22 @@ export function HoverFooter() {
 
           {/* Contact Section */}
           <div>
-            <h4 className="text-white text-base font-bold mb-5 tracking-tight">
+            <h4 className="text-slate-900 text-base font-black mb-5 tracking-tight">
               Contact & Support
             </h4>
-            <ul className="space-y-3.5 text-xs text-slate-300">
+            <ul className="space-y-3.5 text-xs text-slate-600">
               {contactInfo.map((item, i) => (
                 <li key={i} className="flex items-center space-x-3">
                   {item.icon}
                   {item.href ? (
                     <a
                       href={item.href}
-                      className="hover:text-teal-300 transition-colors"
+                      className="hover:text-teal-700 transition-colors font-medium"
                     >
                       {item.text}
                     </a>
                   ) : (
-                    <span className="hover:text-teal-300 transition-colors">
+                    <span className="hover:text-teal-700 transition-colors font-medium">
                       {item.text}
                     </span>
                   )}
@@ -286,18 +282,23 @@ export function HoverFooter() {
           </div>
         </div>
 
-        <hr className="border-t border-slate-800/80 my-6" />
+        {/* Large Dynamic SVG Text Hover Effect - Directly Under the 4 Columns */}
+        <div className="flex w-full h-[14rem] sm:h-[20rem] md:h-[24rem] lg:h-[26rem] my-2 relative z-10 items-center justify-center overflow-hidden">
+          <TextHoverEffect text="NEXUS" />
+        </div>
 
-        {/* Footer Bottom */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-xs space-y-4 md:space-y-0 text-slate-400">
+        <hr className="border-t border-slate-200/90 my-6" />
+
+        {/* Footer Bottom - Placed Under NEXUS Text */}
+        <div className="flex flex-col md:flex-row justify-between items-center text-xs space-y-4 md:space-y-0 text-slate-500 relative z-20">
           {/* Social Icons */}
-          <div className="flex space-x-5 text-slate-400">
+          <div className="flex space-x-5 text-slate-500">
             {socialLinks.map(({ icon, label, href }) => (
               <a
                 key={label}
                 href={href}
                 aria-label={label}
-                className="hover:text-teal-400 transition-colors p-2 bg-slate-900/80 rounded-xl border border-slate-800 hover:border-teal-500/40"
+                className="hover:text-teal-700 text-slate-600 transition-colors p-2.5 bg-slate-50 hover:bg-teal-50/60 rounded-xl border border-slate-200 hover:border-teal-500/40 shadow-sm"
               >
                 {icon}
               </a>
@@ -305,15 +306,10 @@ export function HoverFooter() {
           </div>
 
           {/* Copyright */}
-          <p className="text-center md:text-left text-slate-400">
+          <p className="text-center md:text-left text-slate-500 font-medium">
             &copy; {new Date().getFullYear()} Nexus Enroll 2.0 Academic Systems. All rights reserved.
           </p>
         </div>
-      </div>
-
-      {/* Large Dynamic SVG Text Hover Effect */}
-      <div className="lg:flex hidden h-[26rem] -mt-44 -mb-32">
-        <TextHoverEffect text="NEXUS" className="z-50" />
       </div>
 
       <FooterBackgroundGradient />

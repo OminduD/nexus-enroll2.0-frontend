@@ -233,9 +233,7 @@ export const NavbarLogo = () => {
       href="#"
       className="relative z-20 mr-4 flex items-center space-x-2.5 px-1 py-1 text-sm font-bold text-slate-900 dark:text-white"
     >
-      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-700 to-teal-600 text-white flex items-center justify-center font-black text-sm shadow-sm">
-        N
-      </div>
+      <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-8 h-8 object-contain flex-shrink-0" />
       <span className="font-extrabold text-sm tracking-tight text-[#333333] dark:text-white leading-tight">
         Nexus<span className="text-teal-700 dark:text-teal-400">Enroll</span>
       </span>

@@ -11,8 +11,10 @@ import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
 import { useAuth } from '../../context/AuthContext';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const StudentSchedulePage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [schedule, setSchedule] = useState<StudentEnrollment[]>([]);
   const [dropTarget, setDropTarget] = useState<StudentEnrollment | null>(null);
   const [isDropModalOpen, setIsDropModalOpen] = useState(false);
@@ -22,10 +24,17 @@ export const StudentSchedulePage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadSchedule = async () => {
-    const p = await studentService.getProfile(user?.id || 1);
-    const actualStudentId = p?.id || user?.id || 1;
-    const data = await studentService.getSchedule(actualStudentId);
-    setSchedule(data);
+    setIsLoading(true);
+    try {
+      const p = await studentService.getProfile(user?.id || 1);
+      const actualStudentId = p?.id || user?.id || 1;
+      const data = await studentService.getSchedule(actualStudentId);
+      setSchedule(data);
+    } catch (e) {
+      console.warn('Student schedule fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -50,6 +59,10 @@ export const StudentSchedulePage: React.FC = () => {
   // Days for Timetable Grid
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const timeSlots = ['09:00 AM', '11:00 AM', '02:00 PM'];
+
+  if (isLoading) {
+    return <TableSkeleton rows={5} />;
+  }
 
   return (
     <div className="space-y-6">

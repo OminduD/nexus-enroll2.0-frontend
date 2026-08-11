@@ -10,8 +10,10 @@ import { GradeRecord } from '../../types/faculty';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const GradeManagementPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [grades, setGrades] = useState<GradeRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,12 +28,22 @@ export const GradeManagementPage: React.FC = () => {
   const { showToast } = useToast();
 
   const loadGrades = async () => {
-    const list = await facultyService.getGrades(1);
-    setGrades(list);
+    setIsLoading(true);
+    try {
+      const list = await facultyService.getGrades(1);
+      setGrades(list);
+    } catch (e) {
+      console.warn('Grade management fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadGrades();
+    const handleUpdate = () => loadGrades();
+    window.addEventListener('nexus_grades_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_grades_updated', handleUpdate);
   }, []);
 
   const handleSaveDraft = async () => {
@@ -56,6 +68,31 @@ export const GradeManagementPage: React.FC = () => {
     }
   };
 
+  const handleSaveAndSubmitDirectly = async () => {
+    try {
+      const draft = await facultyService.saveDraftGrade({
+        enrollmentId: 101,
+        studentId: 1,
+        sectionId: 1,
+        studentName: formData.studentName,
+        courseCode: 'CS-101',
+        assignmentTitle: formData.assignmentTitle,
+        pointsEarned: Number(formData.pointsEarned),
+        maxPoints: Number(formData.maxPoints),
+        letterGrade: formData.letterGrade,
+        comments: formData.comments,
+      });
+      if (draft && draft.id) {
+        await facultyService.submitGrade(draft.id);
+      }
+      showToast('Grade submitted for Admin approval! Status: PENDING.', 'success');
+      setIsModalOpen(false);
+      await loadGrades();
+    } catch {
+      showToast('Failed to submit grade.', 'error');
+    }
+  };
+
   const handleSubmitForApproval = async (gradeId: number) => {
     try {
       await facultyService.submitGrade(gradeId);
@@ -76,6 +113,10 @@ export const GradeManagementPage: React.FC = () => {
         return <Badge variant="warning">DRAFT</Badge>;
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -219,18 +260,24 @@ export const GradeManagementPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3">
+          <div className="flex items-center justify-end gap-2.5 pt-3">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-[#333333]"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-[#333333]"
             >
               Cancel
             </button>
             <button
               onClick={handleSaveDraft}
-              className="px-4 py-2.5 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold text-xs shadow-md flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all"
             >
-              <Save className="w-4 h-4" /> Save as DRAFT
+              <Save className="w-3.5 h-3.5" /> Save Draft
+            </button>
+            <button
+              onClick={handleSaveAndSubmitDirectly}
+              className="px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs shadow-md flex items-center gap-1.5 transition-all"
+            >
+              <Send className="w-3.5 h-3.5" /> Submit to Admin
             </button>
           </div>
         </div>

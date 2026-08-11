@@ -11,8 +11,10 @@ import { ClassRosterStudent } from '../../types/faculty';
 import { CourseSection } from '../../types/course';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const ClassRosterPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [sections, setSections] = useState<CourseSection[]>([]);
   const [selectedSection, setSelectedSection] = useState<CourseSection | null>(null);
   const [roster, setRoster] = useState<ClassRosterStudent[]>([]);
@@ -21,10 +23,17 @@ export const ClassRosterPage: React.FC = () => {
 
   useEffect(() => {
     const loadSections = async () => {
-      const secList = await courseService.getSections();
-      setSections(secList);
-      if (secList.length > 0) {
-        setSelectedSection(secList[0]);
+      setIsLoading(true);
+      try {
+        const secList = await courseService.getSections();
+        setSections(secList);
+        if (secList.length > 0) {
+          setSelectedSection(secList[0]);
+        }
+      } catch (e) {
+        console.warn('Class roster fallback:', e);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadSections();
@@ -43,6 +52,10 @@ export const ClassRosterPage: React.FC = () => {
       (s.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
       (s.studentIdNumber?.toLowerCase() || '').includes(searchQuery.toLowerCase())
   );
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">

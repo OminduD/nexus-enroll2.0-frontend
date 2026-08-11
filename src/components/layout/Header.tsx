@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /**
  * Top navigation bar: consumes AuthContext for the signed-in user and
  * logout(), and renders NotificationPopover (which calls
@@ -6,6 +7,29 @@
  */
 import React, { useState, useEffect } from 'react';
 import { Search, LogOut, Menu, Sparkles, Command, User as UserIcon } from 'lucide-react';
+=======
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Search,
+  LogOut,
+  Sparkles,
+  Command,
+  User as UserIcon,
+  ChevronRight,
+  PanelLeft,
+  LayoutDashboard,
+  BookOpen,
+  Calendar,
+  GraduationCap,
+  FileText,
+  Users,
+  CheckSquare,
+  Sliders,
+  ShieldCheck,
+  Activity,
+  Bell
+} from 'lucide-react';
+>>>>>>> aaad1120f647e708f8850b54cc0f490623be607e
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../ui/Badge';
 import { NotificationPopover } from '../common/NotificationPopover';
@@ -25,12 +49,127 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
 }
 
+interface PageMeta {
+  title: string;
+  section: string;
+  icon: React.ComponentType<{ className?: string }>;
+  chipText?: string;
+}
+
+const getPageMeta = (pathname: string, role?: string): PageMeta => {
+  const portalName = role === 'ADMIN' ? 'Admin Portal' : role === 'FACULTY' ? 'Faculty Portal' : 'Student Portal';
+
+  if (pathname.includes('/dashboard')) {
+    return {
+      title: 'Dashboard Overview',
+      section: portalName,
+      icon: LayoutDashboard,
+      chipText: 'Real-Time Sync',
+    };
+  }
+  if (pathname.includes('/account')) {
+    return {
+      title: 'Account Settings',
+      section: portalName,
+      icon: UserIcon,
+      chipText: 'Verified Profile',
+    };
+  }
+  if (pathname.includes('/courses')) {
+    return {
+      title: 'Course Catalog',
+      section: 'Academic Engine',
+      icon: BookOpen,
+      chipText: 'Spring 2026',
+    };
+  }
+  if (pathname.includes('/schedule')) {
+    return {
+      title: 'Timetable & Schedule',
+      section: portalName,
+      icon: Calendar,
+      chipText: 'Weekly Matrix',
+    };
+  }
+  if (pathname.includes('/progress')) {
+    return {
+      title: 'Degree Audit',
+      section: 'Academic Engine',
+      icon: GraduationCap,
+      chipText: 'Audit Ready',
+    };
+  }
+  if (pathname.includes('/records')) {
+    return {
+      title: 'Academic Transcripts',
+      section: 'Records Office',
+      icon: FileText,
+      chipText: 'Official Records',
+    };
+  }
+  if (pathname.includes('/roster')) {
+    return {
+      title: 'Class Roster',
+      section: 'Faculty Suite',
+      icon: Users,
+      chipText: 'Live Student Roll',
+    };
+  }
+  if (pathname.includes('/grades')) {
+    return {
+      title: 'Grade Management',
+      section: 'Faculty Suite',
+      icon: CheckSquare,
+      chipText: 'Grades Open',
+    };
+  }
+  if (pathname.includes('/change-requests')) {
+    return {
+      title: 'Change Requests',
+      section: 'Administration',
+      icon: Sliders,
+      chipText: 'Approvals Queue',
+    };
+  }
+  if (pathname.includes('/users')) {
+    return {
+      title: 'User Directory',
+      section: 'Administration',
+      icon: ShieldCheck,
+      chipText: 'Access Control',
+    };
+  }
+  if (pathname.includes('/reports')) {
+    return {
+      title: 'Analytics Reports',
+      section: 'Administration',
+      icon: Activity,
+      chipText: 'Live Metrics',
+    };
+  }
+  if (pathname.includes('/notifications')) {
+    return {
+      title: 'Notifications',
+      section: 'System Center',
+      icon: Bell,
+      chipText: 'Alert Center',
+    };
+  }
+  return {
+    title: 'Portal Overview',
+    section: portalName,
+    icon: Sparkles,
+    chipText: 'System Active',
+  };
+};
+
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,6 +181,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isUserMenuOpen]);
 
   const getRoleVariant = (role?: string) => {
     switch (role) {
@@ -60,23 +211,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     return '/student/account';
   };
 
-  // Derive current page title from path
-  const getPageTitle = (pathname: string) => {
-    if (pathname.includes('/dashboard')) return 'Dashboard Overview';
-    if (pathname.includes('/account')) return 'Account Settings';
-    if (pathname.includes('/courses')) return 'Course Directory';
-    if (pathname.includes('/schedule')) return 'Timetable & Schedule';
-    if (pathname.includes('/progress')) return 'Degree Audit';
-    if (pathname.includes('/records')) return 'Academic Transcripts';
-    if (pathname.includes('/roster')) return 'Class Roster';
-    if (pathname.includes('/grades')) return 'Grade Management';
-    if (pathname.includes('/change-requests')) return 'Change Requests';
-    if (pathname.includes('/users')) return 'User Directory';
-    if (pathname.includes('/reports')) return 'Analytics Reports';
-    if (pathname.includes('/notifications')) return 'Notifications';
-    return 'Portal Overview';
-  };
-
+  const pageMeta = getPageMeta(location.pathname, user?.role);
+  const PageIcon = pageMeta.icon;
   const avatarUrl = getUserAvatar(user);
 
   return (
@@ -84,19 +220,40 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       <Navbar className="w-full">
       {/* Desktop Resizable Navigation */}
       <NavBody className="flex items-center justify-between transition-all duration-300">
-        {/* Left section: Sidebar toggle & Context Breadcrumb */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onToggleSidebar}
-            className="p-2 rounded-xl text-[#333333] dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-slate-800 transition-colors"
-            title="Toggle Navigation Menu"
-          >
-            <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
-          </button>
+        {/* Left section: Interactive Breadcrumb */}
+        <div className="flex items-center gap-2.5">
 
-          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-            <span>{getPageTitle(location.pathname)}</span>
+          {/* Breadcrumb & Dynamic Context Bar */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/90 dark:border-slate-800 backdrop-blur-md shadow-2xs hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+            {/* Small Brand Logo */}
+            <Link to="/" className="flex items-center gap-1.5 shrink-0 group/logo" title="Nexus Enroll Portal">
+              <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-5 h-5 object-contain group-hover/logo:scale-110 transition-transform" />
+            </Link>
+
+            <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />
+
+            {/* Category Portal Root */}
+            <span className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider hidden sm:inline-block">
+              {pageMeta.section}
+            </span>
+
+            <ChevronRight className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0 hidden sm:inline-block" />
+
+            {/* Current Page Title with Category Icon */}
+            <div className="flex items-center gap-1.5">
+              <PageIcon className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+              <span className="text-xs font-black tracking-tight text-slate-800 dark:text-white">
+                {pageMeta.title}
+              </span>
+            </div>
+
+            {/* Useful Live Status Chip */}
+            {pageMeta.chipText && (
+              <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800 ml-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                {pageMeta.chipText}
+              </span>
+            )}
           </div>
         </div>
 
@@ -124,7 +281,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
           <NotificationPopover userId={user?.id} role={user?.role} />
 
-          <div className="relative pl-2 border-l border-slate-200/80 dark:border-slate-800">
+          <div className="relative pl-2 border-l border-slate-200/80 dark:border-slate-800" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center gap-2 p-1 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800 transition-colors"
@@ -142,9 +299,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </button>
 
             {isUserMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setIsUserMenuOpen(false)} />
-                <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl p-2 shadow-2xl z-40 border border-slate-200/90 dark:border-slate-800 animate-slide-up">
+              <div className="absolute right-0 mt-2 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl p-2 shadow-2xl z-50 border border-slate-200/90 dark:border-slate-800 animate-slide-up">
                   <div className="px-3.5 py-2.5 border-b border-slate-100 dark:border-slate-800 mb-1 bg-slate-50/60 dark:bg-slate-800/60 rounded-xl flex items-center gap-3">
                     <img
                       src={avatarUrl}
@@ -184,7 +339,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     <LogOut className="w-4 h-4 text-rose-500" /> Sign Out of Nexus
                   </button>
                 </div>
-              </>
             )}
           </div>
         </div>
@@ -196,13 +350,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleSidebar}
-              className="p-1.5 rounded-xl text-[#333333] dark:text-slate-200 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700"
+              title="Toggle Navigation Menu"
             >
-              <Menu className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+              <PanelLeft className="w-4.5 h-4.5 text-slate-700 dark:text-slate-300" />
             </button>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Sparkles className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
-              <span className="truncate max-w-[140px]">{getPageTitle(location.pathname)}</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 text-xs font-bold text-slate-800 dark:text-white shadow-2xs">
+              <img src="/nexuslogo.webp" alt="Nexus Logo" className="w-4.5 h-4.5 object-contain shrink-0" />
+              <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
+              <span className="truncate max-w-[130px] font-extrabold">{pageMeta.title}</span>
             </div>
           </div>
 

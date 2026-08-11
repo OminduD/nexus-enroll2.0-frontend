@@ -11,18 +11,27 @@ import { Badge } from '../../components/ui/Badge';
 import { studentService } from '../../services/studentService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const AcademicRecordsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [records, setRecords] = useState<CompletedCourseRecord[]>([]);
   const { user } = useAuth();
   const { showToast } = useToast();
 
   useEffect(() => {
     const loadRecords = async () => {
-      const p = await studentService.getProfile(user?.id || 1);
-      const actualStudentId = p?.id || user?.id || 1;
-      const data = await recordService.getCompletedCourses(actualStudentId);
-      setRecords(data);
+      setIsLoading(true);
+      try {
+        const p = await studentService.getProfile(user?.id || 1);
+        const actualStudentId = p?.id || user?.id || 1;
+        const data = await recordService.getCompletedCourses(actualStudentId);
+        setRecords(data);
+      } catch (e) {
+        console.warn('Academic records fallback:', e);
+      } finally {
+        setIsLoading(false);
+      }
     };
     loadRecords();
   }, [user]);
@@ -38,6 +47,10 @@ export const AcademicRecordsPage: React.FC = () => {
     if (grade.startsWith('C')) return 'warning';
     return 'danger';
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={6} />;
+  }
 
   return (
     <div className="space-y-6">

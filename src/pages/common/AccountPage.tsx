@@ -1,5 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { studentService } from '../../services/studentService';
+import { ProfileSkeleton } from '../../components/ui/Skeleton';
 import { DUMMY_AVATARS, getUserAvatar, DummyAvatar } from '../../lib/avatars';
 import { Badge } from '../../components/ui/Badge';
 import { useToast } from '../../components/ui/Toast';
@@ -28,6 +30,7 @@ export const AccountPage: React.FC = () => {
   const { showToast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -37,6 +40,16 @@ export const AccountPage: React.FC = () => {
   const [customUrlInput, setCustomUrlInput] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'All' | 'Casual' | 'Professional' | 'Executive' | '3D Vector'>('All');
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    // Populate form with current logged in user's profile details
+    if (user) {
+      setFirstName(user.firstName || '');
+      setLastName(user.lastName || '');
+      setEmail(user.email || '');
+    }
+    setIsLoading(false);
+  }, [user]);
 
   const activeAvatarUrl = getUserAvatar(user);
 
@@ -77,15 +90,36 @@ export const AccountPage: React.FC = () => {
     setCustomUrlInput('');
   };
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
+    try {
+      const studentId = user?.id || 1;
+      const updated = await studentService.updateProfile(studentId, {
+        firstName,
+        lastName,
+        email,
+        major: department,
+      });
+
+      updateUser({
+        firstName: updated.firstName || firstName,
+        lastName: updated.lastName || lastName,
+        email: updated.email || email,
+      });
+
+      showToast('Account details saved to database successfully!', 'success');
+    } catch {
       updateUser({ firstName, lastName, email });
+      showToast('Profile updated locally.', 'info');
+    } finally {
       setIsSaving(false);
-      showToast('Account profile details saved successfully!', 'success');
-    }, 500);
+    }
   };
+
+  if (isLoading) {
+    return <ProfileSkeleton />;
+  }
 
   return (
     <motion.div

@@ -9,18 +9,30 @@ import { facultyService } from '../../services/facultyService';
 import { GradeRecord } from '../../types/faculty';
 import { Badge } from '../../components/ui/Badge';
 import { useToast } from '../../components/ui/Toast';
+import { TableSkeleton } from '../../components/ui/Skeleton';
 
 export const GradeApprovalsPage: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [grades, setGrades] = useState<GradeRecord[]>([]);
   const { showToast } = useToast();
 
   const loadPendingGrades = async () => {
-    const list = await facultyService.getGrades(1);
-    setGrades(list);
+    setIsLoading(true);
+    try {
+      const list = await facultyService.getGrades(1);
+      setGrades(list);
+    } catch (e) {
+      console.warn('Grade approvals fallback:', e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadPendingGrades();
+    const handleUpdate = () => loadPendingGrades();
+    window.addEventListener('nexus_grades_updated', handleUpdate);
+    return () => window.removeEventListener('nexus_grades_updated', handleUpdate);
   }, []);
 
   const handleApprove = async (gradeId: number) => {
@@ -42,6 +54,10 @@ export const GradeApprovalsPage: React.FC = () => {
       showToast('Rejection failed.', 'error');
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={5} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -101,7 +117,7 @@ export const GradeApprovalsPage: React.FC = () => {
                     </Badge>
                   </td>
                   <td className="p-3.5 text-right">
-                    {g.status === 'PENDING' ? (
+                    {g.status === 'PENDING' || g.status === 'DRAFT' ? (
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleReject(g.id)}

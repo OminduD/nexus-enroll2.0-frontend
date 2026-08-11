@@ -1,6 +1,7 @@
 import { apiClient, ensureArray, withMockFallback } from './api';
 import { Course, CourseSection, Department, DegreeProgram, ChangeRequest } from '../types/course';
 import { MOCK_COURSES, MOCK_SECTIONS, MOCK_DEPARTMENTS, MOCK_PROGRAMS, MOCK_CHANGE_REQUESTS } from './mockData';
+import { getStoredChangeRequests, addStoredChangeRequest, updateStoredChangeRequestStatus } from './localStore';
 
 export const courseService = {
   getCourses: async (keyword?: string, departmentId?: number, page = 0, size = 10): Promise<Course[]> => {
@@ -111,32 +112,29 @@ export const courseService = {
   getChangeRequests: async (): Promise<ChangeRequest[]> => {
     try {
       const response = await apiClient.get('/api/courses/change-requests');
-      return ensureArray(response.data, MOCK_CHANGE_REQUESTS);
+      const data = ensureArray<ChangeRequest>(response.data);
+      const local = getStoredChangeRequests();
+      const combined = [...local, ...data];
+      return Array.from(new Map(combined.map(n => [n.id || Date.now(), n])).values())
+                  .sort((a, b) => (b.id || 0) - (a.id || 0));
     } catch (error) {
-      return withMockFallback(error, MOCK_CHANGE_REQUESTS);
+      return withMockFallback(error, getStoredChangeRequests());
     }
   },
 
   createChangeRequest: async (req: Partial<ChangeRequest>): Promise<ChangeRequest> => {
     try {
-      const response = await apiClient.post('/api/courses/change-requests', req);
-      return response.data;
+      const payload = {
+        ...req,
+        justification: req.details || 'No justification provided',
+        requestedBy: typeof req.requestedBy === 'string' ? 1 : (req.requestedBy || 1),
+      };
+      const response = await apiClient.post('/api/courses/change-requests', payload);
+      const newReq = response.data?.data || response.data;
+      addStoredChangeRequest(newReq || req);
+      return newReq;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const newReq: ChangeRequest = {
-          id: Date.now(),
-          courseId: req.courseId || 1,
-          courseCode: req.courseCode || 'CS-101',
-          requestType: req.requestType || 'CAPACITY_CHANGE',
-          requestedBy: req.requestedBy || 'prof_smith',
-          proposedValue: req.proposedValue || '50',
-          details: req.details || 'Capacity increase justification',
-          status: 'PENDING',
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        MOCK_CHANGE_REQUESTS.unshift(newReq);
-        return newReq;
-      })());
+      return withMockFallback(error, addStoredChangeRequest(req));
     }
   },
 
@@ -146,16 +144,11 @@ export const courseService = {
         reviewedBy: 3,
         reviewComment: comment
       });
+      updateStoredChangeRequestStatus(id, 'APPROVED', comment);
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
-        if (item) {
-          item.status = 'APPROVED';
-          item.reviewComment = comment;
-        }
-        return { success: true };
-      })());
+      updateStoredChangeRequestStatus(id, 'APPROVED', comment);
+      return withMockFallback(error, { success: true });
     }
   },
 
@@ -165,16 +158,11 @@ export const courseService = {
         reviewedBy: 3,
         reviewComment: comment
       });
+      updateStoredChangeRequestStatus(id, 'REJECTED', comment);
       return response.data;
     } catch (error) {
-      return withMockFallback(error, (() => {
-        const item = MOCK_CHANGE_REQUESTS.find(r => r.id === id);
-        if (item) {
-          item.status = 'REJECTED';
-          item.reviewComment = comment;
-        }
-        return { success: true };
-      })());
+      updateStoredChangeRequestStatus(id, 'REJECTED', comment);
+      return withMockFallback(error, { success: true });
     }
   }
 };

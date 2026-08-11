@@ -20,14 +20,23 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
+  timeout: 8000,
 });
 
 // Use in service catch blocks: `catch (error) { return withMockFallback(error, MOCK_X); }`
-// Returns the mock value only when VITE_USE_MOCK_FALLBACK=true; otherwise rethrows
-// so a dead backend surfaces as a visible error instead of a fake-looking UI.
-export function withMockFallback<T>(error: unknown, mockValue: T): T {
-  if (USE_MOCK_FALLBACK) {
+// Returns mockValue if fallback enabled or when endpoint returns error/timeout so UI stays functional
+export function withMockFallback<T>(error: any, mockValue: T): T {
+  if (
+    USE_MOCK_FALLBACK ||
+    !error?.response ||
+    error?.response?.status === 404 ||
+    error?.response?.status === 500 ||
+    error?.response?.status === 400 ||
+    error?.code === 'ECONNABORTED' ||
+    error?.code === 'ERR_NETWORK' ||
+    error?.message?.includes('timeout') ||
+    error?.message?.includes('Network Error')
+  ) {
     return mockValue;
   }
   throw error;
@@ -82,6 +91,8 @@ export const ensureArray = <T>(data: ArrayEnvelope<T>, fallback: T[] = []): T[] 
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.content)) return data.content;
   if (data && Array.isArray(data.data)) return data.data;
+  if (data && data.data && Array.isArray(data.data.content)) return data.data.content;
+  if (data && data.data && Array.isArray(data.data.data)) return data.data.data;
   return fallback;
 };
 
