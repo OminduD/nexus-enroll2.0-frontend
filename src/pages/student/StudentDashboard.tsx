@@ -78,12 +78,7 @@ export const StudentDashboard: React.FC = () => {
           }
         );
 
-<<<<<<< HEAD
-        setProfile(p);
-        const sArray = Array.isArray(s) ? s : ((s as unknown as { content?: StudentEnrollment[] })?.content || []);
-=======
         const sArray = Array.isArray(s) ? s : ((s as any)?.content || []);
->>>>>>> aaad1120f647e708f8850b54cc0f490623be607e
         setSchedule(sArray);
         const nArray = Array.isArray(n) ? n : ((n as unknown as { content?: NotificationItem[] })?.content || []);
         setNotifications(nArray);

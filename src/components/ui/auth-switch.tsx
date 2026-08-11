@@ -126,12 +126,6 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           : '/student/dashboard';
 
       navigate(dest);
-<<<<<<< HEAD
-    } catch (err) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
-      setError(message || 'Invalid username or password. Please try again.');
-      showToast('Authentication failed.', 'error');
-=======
     } catch (err: any) {
       const apiError =
         err.response?.data?.errors && err.response.data.errors.length > 0
@@ -139,7 +133,6 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           : err.response?.data?.message || 'Invalid username or password. Please try again.';
       setError(apiError);
       showToast(apiError || 'Authentication failed.', 'error');
->>>>>>> aaad1120f647e708f8850b54cc0f490623be607e
     } finally {
       setIsSubmitting(false);
     }
@@ -178,25 +171,6 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
         role: 'STUDENT',
       });
 
-<<<<<<< HEAD
-      showToast('Student account created successfully!', 'success');
-
-      const response = await authService.login(signupUsername || signupEmail, signupPassword);
-      login(response.token, {
-        id: response.userId,
-        username: response.username,
-        email: response.email,
-        firstName: response.firstName,
-        lastName: response.lastName,
-        role: response.role,
-      });
-
-      navigate('/student/dashboard');
-    } catch (err) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
-      setError(message || 'Registration failed. Please try again.');
-      showToast('Account creation failed.', 'error');
-=======
       // Check if registration returned a valid token directly
       if (response && response.token) {
         showToast('Student account created successfully!', 'success');
@@ -240,7 +214,6 @@ export const AuthSwitch: React.FC<AuthSwitchProps> = ({
           : err.response?.data?.message || err.message || 'Registration failed. Please try again.';
       setError(apiError);
       showToast(apiError || 'Account creation failed.', 'error');
->>>>>>> aaad1120f647e708f8850b54cc0f490623be607e
     } finally {
       setIsSubmitting(false);
     }
