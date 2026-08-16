@@ -2,12 +2,6 @@ import { ChangeRequest } from '../types/course';
 import { GradeRecord } from '../types/faculty';
 import { NotificationItem } from '../types/notification';
 import { StudentProfile } from '../types/student';
-import {
-  MOCK_CHANGE_REQUESTS,
-  MOCK_GRADES,
-  MOCK_NOTIFICATIONS,
-  MOCK_ALL_STUDENTS,
-} from './mockData';
 
 const KEYS = {
   CHANGE_REQUESTS: 'nexus_change_requests_v2',
@@ -16,18 +10,35 @@ const KEYS = {
   USERS: 'nexus_users_v2',
 };
 
+// Clean legacy mock seeds if present
+export const clearLegacyMockStorage = () => {
+  try {
+    const usersRaw = localStorage.getItem(KEYS.USERS);
+    if (usersRaw && usersRaw.includes('Clark Kent')) {
+      localStorage.removeItem(KEYS.USERS);
+    }
+    const notifsRaw = localStorage.getItem(KEYS.NOTIFICATIONS);
+    if (notifsRaw && notifsRaw.includes('Welcome to NexusEnroll 2.0')) {
+      localStorage.removeItem(KEYS.NOTIFICATIONS);
+    }
+    const crRaw = localStorage.getItem(KEYS.CHANGE_REQUESTS);
+    if (crRaw && crRaw.includes('prof_smith')) {
+      localStorage.removeItem(KEYS.CHANGE_REQUESTS);
+    }
+  } catch (e) {
+    console.warn('Failed to clear legacy mock storage:', e);
+  }
+};
+
 // --- Change Requests Store ---
 export const getStoredChangeRequests = (): ChangeRequest[] => {
   try {
     const raw = localStorage.getItem(KEYS.CHANGE_REQUESTS);
-    if (!raw) {
-      localStorage.setItem(KEYS.CHANGE_REQUESTS, JSON.stringify(MOCK_CHANGE_REQUESTS));
-      return MOCK_CHANGE_REQUESTS;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_CHANGE_REQUESTS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return MOCK_CHANGE_REQUESTS;
+    return [];
   }
 };
 
@@ -42,17 +53,17 @@ export const saveStoredChangeRequests = (requests: ChangeRequest[]) => {
 export const addStoredChangeRequest = (req: Partial<ChangeRequest>): ChangeRequest => {
   const current = getStoredChangeRequests();
   const newReq: ChangeRequest = {
-    id: Date.now(),
+    id: req.id || Date.now(),
     courseId: req.courseId || 1,
     courseCode: req.courseCode || 'CS-101',
     requestType: req.requestType || 'CAPACITY_CHANGE',
-    requestedBy: req.requestedBy || 'prof_smith',
+    requestedBy: req.requestedBy || 'faculty1',
     proposedValue: req.proposedValue || '50',
     details: req.details || 'Capacity expansion request',
-    status: 'PENDING',
-    createdAt: new Date().toISOString().split('T')[0],
+    status: req.status || 'PENDING',
+    createdAt: req.createdAt || new Date().toISOString().split('T')[0],
   };
-  const updated = [newReq, ...current];
+  const updated = [newReq, ...current.filter(c => c.id !== newReq.id)];
   saveStoredChangeRequests(updated);
   window.dispatchEvent(new CustomEvent('nexus_change_requests_updated'));
   return newReq;
@@ -74,14 +85,11 @@ export const updateStoredChangeRequestStatus = (id: number, status: 'APPROVED' |
 export const getStoredGrades = (): GradeRecord[] => {
   try {
     const raw = localStorage.getItem(KEYS.GRADES);
-    if (!raw) {
-      localStorage.setItem(KEYS.GRADES, JSON.stringify(MOCK_GRADES));
-      return MOCK_GRADES;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_GRADES;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return MOCK_GRADES;
+    return [];
   }
 };
 
@@ -96,22 +104,22 @@ export const saveStoredGrades = (grades: GradeRecord[]) => {
 export const addStoredGrade = (gradeData: Partial<GradeRecord>): GradeRecord => {
   const current = getStoredGrades();
   const newGrade: GradeRecord = {
-    id: Date.now(),
-    enrollmentId: gradeData.enrollmentId || 101,
+    id: gradeData.id || Date.now(),
+    enrollmentId: gradeData.enrollmentId || 1,
     studentId: gradeData.studentId || 1,
-    studentName: gradeData.studentName || 'Student Name',
+    studentName: gradeData.studentName || 'Student',
     sectionId: gradeData.sectionId || 1,
     courseCode: gradeData.courseCode || 'CS-101',
     assignmentTitle: gradeData.assignmentTitle || 'Assignment',
     pointsEarned: gradeData.pointsEarned ?? 85,
     maxPoints: gradeData.maxPoints ?? 100,
     letterGrade: gradeData.letterGrade || 'B',
-    comments: gradeData.comments || 'Grade entry',
+    comments: gradeData.comments || '',
     status: gradeData.status || 'DRAFT',
-    gradedBy: gradeData.gradedBy || 'prof_smith',
-    createdAt: new Date().toISOString().split('T')[0],
+    gradedBy: gradeData.gradedBy || 'FACULTY',
+    createdAt: gradeData.createdAt || new Date().toISOString().split('T')[0],
   };
-  const updated = [newGrade, ...current];
+  const updated = [newGrade, ...current.filter(g => g.id !== newGrade.id)];
   saveStoredGrades(updated);
   window.dispatchEvent(new CustomEvent('nexus_grades_updated'));
   return newGrade;
@@ -133,14 +141,11 @@ export const updateStoredGradeStatus = (id: number, status: 'DRAFT' | 'PENDING' 
 export const getStoredNotifications = (): NotificationItem[] => {
   try {
     const raw = localStorage.getItem(KEYS.NOTIFICATIONS);
-    if (!raw) {
-      localStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(MOCK_NOTIFICATIONS));
-      return MOCK_NOTIFICATIONS;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_NOTIFICATIONS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return MOCK_NOTIFICATIONS;
+    return [];
   }
 };
 
@@ -155,16 +160,16 @@ export const saveStoredNotifications = (notifications: NotificationItem[]) => {
 export const addStoredNotification = (payload: Partial<NotificationItem>): NotificationItem => {
   const current = getStoredNotifications();
   const newNotif: NotificationItem = {
-    id: Date.now(),
+    id: payload.id || Date.now(),
     recipientUserId: payload.recipientUserId || 1,
     title: payload.title || 'System Announcement',
     message: payload.message || 'Notification content',
     notificationType: payload.notificationType || 'SYSTEM',
     priority: payload.priority || 'MEDIUM',
-    isRead: false,
-    createdAt: 'Just now',
+    isRead: payload.isRead || false,
+    createdAt: payload.createdAt || 'Just now',
   };
-  const updated = [newNotif, ...current];
+  const updated = [newNotif, ...current.filter(n => n.id !== newNotif.id)];
   saveStoredNotifications(updated);
   window.dispatchEvent(new CustomEvent('nexus_notifications_updated'));
   return newNotif;
@@ -188,14 +193,11 @@ export const markStoredNotificationRead = (id: number) => {
 export const getStoredUsers = (): StudentProfile[] => {
   try {
     const raw = localStorage.getItem(KEYS.USERS);
-    if (!raw) {
-      localStorage.setItem(KEYS.USERS, JSON.stringify(MOCK_ALL_STUDENTS));
-      return MOCK_ALL_STUDENTS;
-    }
+    if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_ALL_STUDENTS;
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return MOCK_ALL_STUDENTS;
+    return [];
   }
 };
 
@@ -209,7 +211,7 @@ export const saveStoredUsers = (users: StudentProfile[]) => {
 
 export const addStoredUser = (userProfile: StudentProfile): StudentProfile => {
   const current = getStoredUsers();
-  const updated = [userProfile, ...current];
+  const updated = [userProfile, ...current.filter(u => u.id !== userProfile.id && u.email !== userProfile.email)];
   saveStoredUsers(updated);
   window.dispatchEvent(new CustomEvent('nexus_users_updated'));
   return userProfile;

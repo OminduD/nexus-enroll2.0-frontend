@@ -1,4 +1,4 @@
-import { apiClient, ensureArray, withMockFallback } from './api';
+import { apiClient, ensureArray, withMockFallback, USE_MOCK_FALLBACK } from './api';
 import { NotificationItem } from '../types/notification';
 import { MOCK_NOTIFICATIONS } from './mockData';
 import {
@@ -9,27 +9,36 @@ import {
 } from './localStore';
 
 export const notificationService = {
-  getUserNotifications: async (userId = 1): Promise<NotificationItem[]> => {
+  getUserNotifications: async (userId = 4): Promise<NotificationItem[]> => {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}`);
-      const data = ensureArray<NotificationItem>(response.data);
-      
-      // If backend succeeds, use its data. Merge with local just in case there are offline items.
-      const local = getStoredNotifications();
-      const combined = [...local, ...data];
-      return Array.from(new Map(combined.map(n => [n.id, n])).values())
-                  .sort((a, b) => b.id - a.id);
+      const rawList = ensureArray<any>(response.data, []);
+      if (rawList.length > 0) {
+        return rawList.map((n: any) => ({
+          id: n.id,
+          recipientUserId: n.recipientUserId || userId,
+          title: n.title || 'Notification',
+          message: n.message || '',
+          notificationType: n.notificationType || 'SYSTEM',
+          priority: n.priority || 'MEDIUM',
+          isRead: n.isRead ?? false,
+          createdAt: n.createdAt ? (typeof n.createdAt === 'string' ? n.createdAt.replace('T', ' ').slice(0, 16) : 'Recently') : 'Just now',
+        })).sort((a, b) => b.id - a.id);
+      }
+      return USE_MOCK_FALLBACK ? MOCK_NOTIFICATIONS : [];
     } catch (error) {
-      return withMockFallback(error, getStoredNotifications());
+      const local = getStoredNotifications();
+      return withMockFallback(error, local.length > 0 ? local : MOCK_NOTIFICATIONS);
     }
   },
 
-  getUnreadCount: async (userId = 1): Promise<number> => {
+  getUnreadCount: async (userId = 4): Promise<number> => {
     try {
       const response = await apiClient.get(`/api/notifications/user/${userId}/unread-count`);
-      const notifs = getStoredNotifications();
       const count = response.data?.data?.count ?? response.data?.count;
-      return typeof count === 'number' ? count : notifs.filter(n => !n.isRead).length;
+      if (typeof count === 'number') return count;
+      const notifs = await notificationService.getUserNotifications(userId);
+      return notifs.filter(n => !n.isRead).length;
     } catch (error) {
       const notifs = getStoredNotifications();
       return withMockFallback(error, notifs.filter(n => !n.isRead).length);
@@ -47,7 +56,7 @@ export const notificationService = {
     }
   },
 
-  markAllAsRead: async (userId = 1) => {
+  markAllAsRead: async (userId = 4) => {
     try {
       const response = await apiClient.post(`/api/notifications/user/${userId}/read-all`);
       markAllStoredNotificationsRead();
@@ -61,16 +70,20 @@ export const notificationService = {
   sendNotification: async (payload: Partial<NotificationItem>) => {
     try {
       const requestPayload = {
-        ...payload,
-        eventType: (payload.notificationType || 'SYSTEM') + '_STUDENT'
+        recipientUserId: payload.recipientUserId || 4,
+        title: payload.title || 'System Notification',
+        message: payload.message || 'Notification details',
+        notificationType: payload.notificationType || 'SYSTEM',
+        priority: payload.priority || 'MEDIUM',
+        relatedEntityType: 'USER',
+        relatedEntityId: payload.recipientUserId || 4,
+        eventType: (payload.notificationType || 'SYSTEM') + '_UPDATE'
       };
       const response = await apiClient.post('/api/notifications', requestPayload);
-      addStoredNotification(payload);
+      const newNotif = response.data?.data || payload;
+      addStoredNotification(newNotif);
       return response.data;
     } catch (error: any) {
-      if (error?.response?.status === 400 && error?.response?.data?.message) {
-        throw error;
-      }
       const newNotif = addStoredNotification(payload);
       return withMockFallback(error, newNotif);
     }

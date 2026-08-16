@@ -1,6 +1,7 @@
-import { apiClient, withMockFallback } from './api';
+import { apiClient, withMockFallback, USE_MOCK_FALLBACK } from './api';
 import { AuthResponse, Role } from '../types/auth';
 import { getStoredUsers, addStoredUser } from './localStore';
+
 export const authService = {
   login: async (identifier: string, password: string, selectedRole?: Role): Promise<AuthResponse> => {
     try {
@@ -14,6 +15,9 @@ export const authService = {
       }
       return resData && resData.data ? resData.data : resData;
     } catch (error: any) {
+      if (!USE_MOCK_FALLBACK) {
+        throw error;
+      }
       const storedUsers = getStoredUsers();
       const matchedUser = storedUsers.find(
         (u: any) => 
@@ -21,10 +25,6 @@ export const authService = {
           (u.studentIdNumber && u.studentIdNumber.toLowerCase() === identifier.toLowerCase()) ||
           (u.username && u.username.toLowerCase() === identifier.toLowerCase())
       );
-      
-      if (!matchedUser && (error?.response?.status === 400 || error?.response?.status === 401)) {
-        throw error;
-      }
       
       const roleAssigned = matchedUser 
         ? (matchedUser.studentIdNumber?.startsWith('FAC') ? 'FACULTY' : matchedUser.studentIdNumber?.startsWith('ADM') ? 'ADMIN' : 'STUDENT')
@@ -54,7 +54,7 @@ export const authService = {
       }
       return resData && resData.data ? resData.data : resData;
     } catch (error: any) {
-      if (error?.response?.status === 400 && error?.response?.data?.message) {
+      if (!USE_MOCK_FALLBACK) {
         throw error;
       }
       const newUser = {
@@ -82,7 +82,7 @@ export const authService = {
       const response = await apiClient.post('/api/auth/provision-staff', data);
       return response.data;
     } catch (error: any) {
-      if (error?.response?.status === 400 && error?.response?.data?.message) {
+      if (!USE_MOCK_FALLBACK) {
         throw error;
       }
       const newUser = {
@@ -109,6 +109,6 @@ export const authService = {
 
   getRoles: async () => {
     const response = await apiClient.get('/api/auth/roles');
-    return response.data;
+    return response.data?.data || response.data;
   }
 };
